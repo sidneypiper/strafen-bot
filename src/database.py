@@ -1,5 +1,6 @@
 import aiosqlite
 import asyncio
+import os.path
 
 sql_create_users_table = """
 CREATE TABLE users (
@@ -64,7 +65,17 @@ INSERT INTO penaltys (penalty_id, penalty, description, value) VALUES
 
 
 async def init_database():
-    async with aiosqlite.connect("./database.db") as db:
+    database_path = os.getenv("DATABASE")
+
+    print("MIGRATION => Initializing database")
+   
+    if os.path.exists(database_path):
+        print("MIGRATION => Database already exists")
+        return
+
+    async with aiosqlite.connect(database_path) as db:
+        print("MIGRATION => Creating tables")
+
         await db.execute(sql_create_users_table)
         await db.commit()
 
@@ -79,6 +90,7 @@ async def init_database():
 
         await db.execute(sql_init_penaltys)
         await db.commit()
-
+        
+        print("MIGRATION => Database initialized")
 
 asyncio.run(init_database())
