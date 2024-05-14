@@ -7,5 +7,10 @@
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
+  },
+  "dependencies": {
+    "better-sqlite3": "^10.0.0",
+    "discord.js": "^14.15.2",
+    "knex": "^3.1.0"
   }
 }
