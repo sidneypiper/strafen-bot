@@ -14,7 +14,7 @@ export async function initDiscordClient(commands: Command[]) {
     const token = process.env.DC_TOKEN;
     const guildId = process.env.DC_GUILD_ID;
     const clientId = process.env.DC_CLIENT_ID;
-    
+
     const discord = new Client({
         intents: [
             GatewayIntentBits.Guilds,
@@ -23,22 +23,30 @@ export async function initDiscordClient(commands: Command[]) {
     });
 
     discord.once(Events.ClientReady, readyClient => {
-	    console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+        console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 
         readyClient.user.setUsername('Strafenbot');
         readyClient.user.setActivity('you fail!', { type: ActivityType.Watching });
     });
 
     discord.login(token);
-    
+
     const rest = new REST().setToken(token);
+
+    rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: [] })
+        .then(() => console.log('Successfully deleted all guild commands.'))
+        .catch(console.error);
+
+    rest.put(Routes.applicationCommands(clientId), { body: [] })
+        .then(() => console.log('Successfully deleted all application commands.'))
+        .catch(console.error);
 
     try {
         console.log('Starting refreshing application (/) commands.');
 
         await rest.put(
             Routes.applicationGuildCommands(clientId!, guildId!),
-            { body: commands.map(c => c.payload())},
+            { body: commands.map(c => c.payload()) },
         );
 
         console.log('Successfully refreshed application (/) commands.');
@@ -51,7 +59,7 @@ export async function initDiscordClient(commands: Command[]) {
 
         const { commandName } = interaction;
 
-        for(const command of commands) {
+        for (const command of commands) {
             if (command.name === commandName)
                 command.handle(interaction);
         }

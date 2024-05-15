@@ -1,21 +1,25 @@
-import { Entity, Column, UpdateDateColumn, CreateDateColumn, PrimaryGeneratedColumn, ManyToOne } from "typeorm"
-import { User } from "./User"
-import { Guild } from "./Guild"
+import { Entity, Column, CreateDateColumn, PrimaryGeneratedColumn, OneToMany } from "typeorm"
+import { Infraction } from "./Infraction"
 
 @Entity()
 export class Penalty {
 
     @PrimaryGeneratedColumn('uuid')
     id: string
-    
-    @ManyToOne(() => User, user => user.penalties)
-    user: User
 
-    @ManyToOne(() => Guild, guild => guild.penalties)
-    guild: Guild
+    @Column()
+    name: string
+
+    @Column()
+    description: string
+
+    @Column({ type: 'float', precision: 2 })
+    price: number
+
+    @OneToMany(() => Infraction, infraction => infraction.penalty)
+    infractions: Infraction[]
 
     @CreateDateColumn()
-
-    @UpdateDateColumn()
+    created_on: Date
 }
 
