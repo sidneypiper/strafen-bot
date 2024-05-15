@@ -53,4 +53,6 @@ export async function initDiscordClient(commands: Command[]) {
                 command.handle(interaction);
         }
     });
-} 
+}
+
+export const logoUrl = 'https://i.imgur.com/4Ril0n5.png';
