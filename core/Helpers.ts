@@ -1,4 +1,4 @@
-import { Client, Events, GatewayIntentBits, REST, Routes } from "discord.js";
+import { ActivityType, Client, Events, GatewayIntentBits, REST, Routes } from "discord.js";
 import type Command from "./Command";
 
 export async function initDiscordClient(commands: Command[]) {
@@ -24,6 +24,9 @@ export async function initDiscordClient(commands: Command[]) {
 
     discord.once(Events.ClientReady, readyClient => {
 	    console.log(`Ready! Logged in as ${readyClient.user.tag}`);
+
+        readyClient.user.setUsername('Strafenbot');
+        readyClient.user.setActivity('you fail!', { type: ActivityType.Watching });
     });
 
     discord.login(token);
