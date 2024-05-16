@@ -18,11 +18,25 @@ export default new Command('cash')
         let embed = null;
 
         if (!user) { // Show general stats
+            const infractions = await database
+                .getRepository(Infraction)
+                .createQueryBuilder('infraction')
+                .innerJoinAndSelect('infraction.penalty', 'penalty')
+                .select('infraction.user_id', 'user_id')
+                .addSelect('COUNT(*)', 'count_penalty')
+                .addSelect('SUM(penalty.price)', 'sum_penalty_price')
+                .where('infraction.guild_id = :guild_id', { guild_id: interaction.guild.id })
+                .groupBy('infraction.user_id')
+                .getRawMany();
+
+            console.log(infractions);
+
             embed = new EmbedBuilder()
                 .setColor(0x0099FF)
-                .setTitle('Test')
+                .setTitle('Cash Stats')
                 .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
-                .setDescription('Some description here')
+                .setDescription('All time cash stats')
+                
                 .setTimestamp();
 
             await interaction.reply({ embeds: [embed] });
@@ -40,6 +54,5 @@ export default new Command('cash')
                 .getRawMany();
 
             console.log(infractions);
-
         }
     });
