@@ -19,6 +19,7 @@ export async function initDiscordClient(commands: Command[]) {
         intents: [
             GatewayIntentBits.Guilds,
             GatewayIntentBits.GuildMessages,
+            GatewayIntentBits.GuildMembers,
         ]
     });
 
