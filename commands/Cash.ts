@@ -13,12 +13,10 @@ export default new Command('cash')
                     .setRequired(false)))
     .setHandler(async interaction => {
         // @ts-ignore
-        const user = interaction.options.getMember('user') || null;
-        
-        const members = await interaction.guild.members.fetch();
-        
-        if (!user) { // Show general stats
-            const infractions = (await database
+        const member = interaction.options.getMember('user') || null;
+         
+        if (!member) { // Show general stats
+            const infractions = await database
                 .getRepository(Infraction)
                 .createQueryBuilder('infraction')
                 .innerJoinAndSelect('infraction.penalty', 'penalty')
@@ -27,16 +25,14 @@ export default new Command('cash')
                 .addSelect('SUM(penalty.price)', 'sum_penalty_price')
                 .where('infraction.guild_id = :guild_id', { guild_id: interaction.guild.id })
                 .groupBy('infraction.user_id')
-                .getRawMany())
-                .map(infraction => {
-                    return {
-                        username: members.get(infraction.user_id)?.user.displayName || 'Unknown',
-                        count_penalty: infraction.count_penalty,
-                        sum_penalty_price: infraction.sum_penalty_price
-                    };
-                });
+                .getRawMany()
+
+            const user_ids = infractions.map(infraction => infraction.user_id);
+           
+            // @ts-ignore
+            const members = await interaction.guild.members.fetch({ user: user_ids, force: true });
             
-            const names = infractions.map(infraction => infraction.username).join('\n');
+            const names = infractions.map(infraction => members.get(infraction.user_id).displayName).join('\n');
             const counts = infractions.map(infraction => infraction.count_penalty + 'x').join('\n');
             const sums = infractions.map(infraction => infraction.sum_penalty_price + '€').join('\n');
 
@@ -62,7 +58,7 @@ export default new Command('cash')
                 .addSelect('COUNT(*)', 'count_penalty')
                 .addSelect('SUM(penalty.price)', 'sum_penalty_price')
                 .where('infraction.guild_id = :guild_id', { guild_id: interaction.guild.id })
-                .andWhere('infraction.user_id = :user_id', { user_id: user.id })
+                .andWhere('infraction.user_id = :user_id', { user_id: member.id })
                 .groupBy('penalty_name')
                 .getRawMany();
             
@@ -72,9 +68,9 @@ export default new Command('cash')
 
             const embed = new EmbedBuilder()
                 .setColor(0x0099FF)
-                .setTitle('Cash Stats for ' + user.user.displayName)
+                .setTitle('Cash Stats for ' + member.displayName)
                 .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
-                .setDescription('All time cash stats for ' + user.user.displayName)
+                .setDescription('All time cash stats for ' + member.displayName)
                 .addFields([
                     { name: 'Infraction', value: infraction_names, inline: true },
                     { name: 'Count', value: counts, inline: true },
