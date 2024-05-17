@@ -24,12 +24,14 @@ database.initialize()
         console.log("Database has been initialized!");
         const afk = await database.manager.insert(Penalty, {
             name: 'AFK',
+            guild_id: '1239207144528805950',
             description: 'Ohne Ankündigung ungemuted AFK sein.',
             price: 1
         });
 
         const gelaber = await database.manager.insert(Penalty, {
             name: 'Dünnschissgelaber',
+            guild_id: '1239207144528805950',
             description: 'Brutales Dünnschissgelaber',
             price: .5
         });
@@ -51,7 +53,6 @@ database.initialize()
             guild_id: '1239207144528805950',
             penalty: gelaber.identifiers[0]
         });
-
     })
     .catch((err) => {
         console.error("Error during Database initialization", err)
