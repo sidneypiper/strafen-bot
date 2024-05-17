@@ -27,7 +27,7 @@ export async function initDiscordClient(commands: Command[]) {
         console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 
         readyClient.user.setUsername('Strafenbot');
-        readyClient.user.setActivity('you fail!', { type: ActivityType.Watching });
+        readyClient.user.setActivity('Google Chrome', { type: ActivityType.Playing });
     });
 
     discord.login(token);
