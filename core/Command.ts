@@ -1,4 +1,6 @@
 import {
+    AutocompleteInteraction,
+    BaseInteraction,
     CommandInteraction,
     SlashCommandBuilder,
     SlashCommandOptionsOnlyBuilder,
@@ -12,10 +14,16 @@ import {
 export default class Command {
     name: string;
     handler: (interaction: CommandInteraction) => Promise<void> = async () => {};
+    autocomplete: ((interaction: AutocompleteInteraction) => Promise<string[]>) = async () => [];
     command: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder = new SlashCommandBuilder();
-
+    
     constructor(name: string) {
         this.name = name;
+    }
+    
+    setAutocomplete(autocomplete: (interaction: AutocompleteInteraction) => Promise<string[]>) {
+        this.autocomplete = autocomplete;
+        return this;
     }
 
     setHandler(handler: (interaction: CommandInteraction) => Promise<void>) { 
@@ -34,7 +42,15 @@ export default class Command {
         return this.command.toJSON();
     }
 
-    async handle(interaction: CommandInteraction) {
+    async handle(interaction: BaseInteraction) {
+        if(interaction.isAutocomplete()) {
+            const choices = await this.autocomplete(interaction);
+
+            await interaction.respond(choices.map(choice => ({name: choice, value: choice})));
+
+            return;
+        } 
+
         if (!interaction.isCommand()) return;
         if (interaction.commandName !== this.name) return;
 

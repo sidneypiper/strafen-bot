@@ -56,7 +56,7 @@ export async function initDiscordClient(commands: Command[]) {
     }
 
     discord.on(Events.InteractionCreate, async interaction => {
-        if (!interaction.isCommand()) return;
+        if (!(interaction.isCommand() || interaction.isAutocomplete())) return;
 
         const { commandName } = interaction;
 
