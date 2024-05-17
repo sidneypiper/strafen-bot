@@ -15,6 +15,9 @@ export class Penalty {
 
     @Column({ type: 'float', precision: 2 })
     price: number
+    
+    @Column()
+    guild_id: string
 
     @OneToMany(() => Infraction, infraction => infraction.penalty)
     infractions: Infraction[]
