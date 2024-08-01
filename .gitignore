@@ -1,3 +1,9 @@
-*.db
+.idea/
+.vscode/
+node_modules/
+build/
+tmp/
+temp/
+data/
 .env
-.DS_Store
+*.db
