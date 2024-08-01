@@ -38,6 +38,10 @@ export async function initDiscordClient(commands: Command[]) {
             .catch(console.error);
     })
 
+    await rest.put(Routes.applicationCommands(clientId), { body: [] })
+        .then(() => console.log('Successfully deleted all application commands.'))
+        .catch(console.error);
+
     try {
         console.log('Starting refreshing application (/) commands.');
 
