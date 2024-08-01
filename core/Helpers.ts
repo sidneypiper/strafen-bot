@@ -32,21 +32,17 @@ export async function initDiscordClient(commands: Command[]) {
 
     await discord.guilds.fetch()
 
-    discord.guilds.cache.each((guild: Guild) => {
-        rest.put(Routes.applicationGuildCommands(clientId, guild.id), { body: [] })
+    discord.guilds.cache.each(async (guild: Guild) => {
+        await rest.put(Routes.applicationGuildCommands(clientId, guild.id), { body: [] })
             .then(() => console.log('Successfully deleted all guild commands for ' + guild.name))
             .catch(console.error);
     })
 
-    rest.put(Routes.applicationCommands(clientId), { body: [] })
-        .then(() => console.log('Successfully deleted all application commands.'))
-        .catch(console.error);
-
     try {
         console.log('Starting refreshing application (/) commands.');
 
-        discord.guilds.cache.each((guild: Guild) => {
-            rest.put(Routes.applicationGuildCommands(clientId, guild.id), { body: commands.map(c => c.payload()) })
+        discord.guilds.cache.each(async (guild: Guild) => {
+            await rest.put(Routes.applicationGuildCommands(clientId, guild.id), { body: commands.map(c => c.payload()) })
                 .then(() => console.log('Successfully added all guild commands for ' + guild.name))
                 .catch(console.error);
         })
