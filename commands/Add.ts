@@ -103,7 +103,6 @@ export default new Command('add')
                     .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
                     .setDescription(`You now have the chance to tell others why you shouldn't be penalized for ${penalty.name}.\n\nOutsiders can now vote for ${Math.floor(TIME_TO_VOTE / 60_000.00)} minutes on whether you are guilty or not.\n\nAs soon as one outsider votes, the voting will end and the result will be displayed.`);
 
-                console.log("Sending confirmation vote");
                 const confirmationVote = await publicBlame.edit({
                     content: null,
                     embeds: [disputeEmbedTie],
@@ -164,7 +163,6 @@ export default new Command('add')
                 }, TIME_TO_VOTE)
 
             } catch (e) {
-                console.log(e)
                 const notInTimeEmbed = new EmbedBuilder()
                     .setColor(0x0099FF)
                     .setTitle(`Too late ${blamed.displayName}!`)

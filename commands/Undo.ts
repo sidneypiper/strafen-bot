@@ -99,7 +99,6 @@ export default new Command('undo')
                     return;
                 }
             } catch (e) {
-                console.error(e)
                 const notInTimeEmbed = new EmbedBuilder()
                     .setColor(0x0099FF)
                     .setTitle(`You didn't confirm in time, the undo was canceled!`)
@@ -114,7 +113,6 @@ export default new Command('undo')
                 return;
             }
         }).catch((e) => {
-            console.error(e);
             interaction.reply({
                 content: `:warning: Nothing to undo for you.`,
                 ephemeral: true
