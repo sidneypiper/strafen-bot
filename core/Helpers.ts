@@ -45,10 +45,11 @@ export async function initDiscordClient(commands: Command[]) {
     try {
         console.log('Starting refreshing application (/) commands.');
 
-        await rest.put(
-            Routes.applicationCommands(clientId!),
-            { body: commands.map(c => c.payload()) },
-        );
+        discord.guilds.cache.each((guild: Guild) => {
+            rest.put(Routes.applicationGuildCommands(clientId, guild.id), { body: commands.map(c => c.payload()) })
+                .then(() => console.log('Successfully added all guild commands for ' + guild.name))
+                .catch(console.error);
+        })
 
         console.log('Successfully refreshed application (/) commands.');
     } catch (error) {
