@@ -13,7 +13,7 @@ export default new Command('undo')
         // @ts-ignore
         const blamee = interaction.user;
 
-        database.getRepository(Infraction).findOneOrFail({
+        await database.getRepository(Infraction).findOneOrFail({
             where: {
                 guild_id: Equal(interaction.guild.id),
                 user_id: Equal(blamee.id)
@@ -99,16 +99,17 @@ export default new Command('undo')
                     return;
                 }
             } catch (e) {
+                console.error(e)
                 const notInTimeEmbed = new EmbedBuilder()
                     .setColor(0x0099FF)
                     .setTitle(`You didn't confirm in time, the undo was canceled!`)
-                    .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl });
+                    .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
 
 	            await confirmationMessage.edit({
                     content: null,
                     embeds: [notInTimeEmbed],
                     components: []
-                });
+                })
                 
                 return;
             }
