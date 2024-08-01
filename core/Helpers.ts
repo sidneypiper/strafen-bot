@@ -5,14 +5,10 @@ export async function initDiscordClient(commands: Command[]) {
     if (!process.env.DC_TOKEN)
         throw new Error('DC_TOKEN environment variable is not set');
 
-    if (!process.env.DC_GUILD_ID)
-        throw new Error('DC_GUILD_ID environment variable is not set');
-
     if (!process.env.DC_CLIENT_ID)
         throw new Error('DC_CLIENT_ID environment variable is not set');
 
     const token = process.env.DC_TOKEN;
-    const guildId = process.env.DC_GUILD_ID;
     const clientId = process.env.DC_CLIENT_ID;
 
     const discord = new Client({
@@ -30,13 +26,9 @@ export async function initDiscordClient(commands: Command[]) {
         readyClient.user.setActivity('Google Chrome', { type: ActivityType.Playing });
     });
 
-    discord.login(token);
+    await discord.login(token);
 
     const rest = new REST().setToken(token);
-
-    rest.put(Routes.applicationGuildCommands(clientId, guildId), { body: [] })
-        .then(() => console.log('Successfully deleted all guild commands.'))
-        .catch(console.error);
 
     rest.put(Routes.applicationCommands(clientId), { body: [] })
         .then(() => console.log('Successfully deleted all application commands.'))
@@ -46,7 +38,7 @@ export async function initDiscordClient(commands: Command[]) {
         console.log('Starting refreshing application (/) commands.');
 
         await rest.put(
-            Routes.applicationGuildCommands(clientId!, guildId!),
+            Routes.applicationCommands(clientId!),
             { body: commands.map(c => c.payload()) },
         );
 
@@ -62,7 +54,7 @@ export async function initDiscordClient(commands: Command[]) {
 
         for (const command of commands) {
             if (command.name === commandName)
-                command.handle(interaction);
+                await command.handle(interaction);
         }
     });
 }
