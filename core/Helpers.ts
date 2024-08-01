@@ -1,4 +1,4 @@
-import { ActivityType, Client, Events, GatewayIntentBits, REST, Routes } from "discord.js";
+import {ActivityType, Client, Events, GatewayIntentBits, Guild, REST, Routes} from "discord.js";
 import type Command from "./Command";
 
 export async function initDiscordClient(commands: Command[]) {
@@ -29,6 +29,14 @@ export async function initDiscordClient(commands: Command[]) {
     await discord.login(token);
 
     const rest = new REST().setToken(token);
+
+    await discord.guilds.fetch()
+
+    discord.guilds.cache.each((guild: Guild) => {
+        rest.put(Routes.applicationGuildCommands(clientId, guild.id), { body: [] })
+            .then(() => console.log('Successfully deleted all guild commands for ' + guild.name))
+            .catch(console.error);
+    })
 
     rest.put(Routes.applicationCommands(clientId), { body: [] })
         .then(() => console.log('Successfully deleted all application commands.'))
