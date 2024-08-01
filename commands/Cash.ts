@@ -14,7 +14,7 @@ export default new Command('cash')
     .setHandler(async interaction => {
         // @ts-ignore
         const member = interaction.options.getMember('user') || null;
-         
+
         if (!member) { // Show general stats
             const infractions = await database
                 .getRepository(Infraction)
@@ -27,14 +27,14 @@ export default new Command('cash')
                 .groupBy('infraction.user_id')
                 .getRawMany()
 
-            const user_ids = infractions.map(infraction => infraction.user_id);
-           
+            const user_ids = infractions.map(infraction => infraction.user_id)
+
             // @ts-ignore
-            const members = await interaction.guild.members.fetch({ user: user_ids, force: true });
-            
-            const names = infractions.map(infraction => members.get(infraction.user_id).displayName).join('\n');
-            const counts = infractions.map(infraction => infraction.count_penalty + 'x').join('\n');
-            const sums = infractions.map(infraction => infraction.sum_penalty_price + '€').join('\n');
+            const members = await interaction.guild.members.fetch({ user: user_ids, force: true })
+
+            const names = infractions.map(infraction => members.get(infraction.user_id).displayName).join('\n') || '\n';
+            const counts = infractions.map(infraction => infraction.count_penalty + 'x').join('\n') || '\n';
+            const sums = infractions.map(infraction => infraction.sum_penalty_price + '€').join('\n') || '\n';
 
             const embed = new EmbedBuilder()
                 .setColor(0x0099FF)
@@ -45,7 +45,7 @@ export default new Command('cash')
                     { name: 'User', value: names, inline: true },
                     { name: 'Count', value: counts, inline: true },
                     { name: 'Sum', value: sums, inline: true }
-                
+
                 ])
 
             await interaction.reply({ embeds: [embed] });
@@ -60,11 +60,11 @@ export default new Command('cash')
                 .where('infraction.guild_id = :guild_id', { guild_id: interaction.guild.id })
                 .andWhere('infraction.user_id = :user_id', { user_id: member.id })
                 .groupBy('penalty_name')
-                .getRawMany();
-            
-            const infraction_names = infractions.map(infraction => infraction.penalty_name).join('\n');
-            const counts = infractions.map(infraction => infraction.count_penalty + 'x').join('\n');
-            const sums = infractions.map(infraction => infraction.sum_penalty_price + '€').join('\n');
+                .getRawMany()
+
+            const infraction_names = infractions.map(infraction => infraction.penalty_name).join('\n') || '\n'
+            const counts = infractions.map(infraction => infraction.count_penalty + 'x').join('\n') || '\n'
+            const sums = infractions.map(infraction => infraction.sum_penalty_price + '€').join('\n') || '\n'
 
             const embed = new EmbedBuilder()
                 .setColor(0x0099FF)
@@ -75,9 +75,8 @@ export default new Command('cash')
                     { name: 'Infraction', value: infraction_names, inline: true },
                     { name: 'Count', value: counts, inline: true },
                     { name: 'Sum', value: sums, inline: true }
-                
                 ])
 
-            await interaction.reply({ embeds: [embed] });
+            await interaction.reply({ embeds: [embed] })
         }
     });
