@@ -40,7 +40,7 @@ export default new Command('cash')
             const counts = infractions.map(infraction => infraction.count_penalty + 'x').join('\n') || '\n';
             const sums = infractions.map(infraction => infraction.sum_penalty_price + '€').join('\n') || '\n';
 
-            const sum = infractions.reduce((acc, x) => acc + x, 0)
+            const sum = infractions.reduce((acc, x) => acc + x.sum_penalty_price, 0)
 
             const embed = new EmbedBuilder()
                 .setColor(0x0099FF)
@@ -72,7 +72,7 @@ export default new Command('cash')
             const counts = infractions.map(infraction => infraction.count_penalty + 'x').join('\n') || '\n'
             const sums = infractions.map(infraction => infraction.sum_penalty_price + '€').join('\n') || '\n'
 
-            const sum = infractions.reduce((acc, x) => acc + x, 0)
+            const sum = infractions.reduce((acc, x) => acc + x.sum_penalty_price, 0)
 
             const embed = new EmbedBuilder()
                 .setColor(0x0099FF)
