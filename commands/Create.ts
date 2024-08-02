@@ -43,7 +43,7 @@ export default new Command('create')
 
         const embed = new EmbedBuilder()
             .setColor(0x0099FF)
-            .setTitle('New penalty')
+            .setTitle(`${name} now costs ${price}! Watch out!`)
             .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
             .setDescription('Successfully added new penalty: ' + name)
 
