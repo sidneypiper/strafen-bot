@@ -29,6 +29,7 @@ export default new Command('cash')
                 .addSelect('SUM(penalty.price)', 'sum_penalty_price')
                 .where('infraction.guild_id = :guild_id', {guild_id: interaction.guild.id})
                 .groupBy('infraction.user_id')
+                .orderBy('sum_penalty_price', 'DESC')
                 .getRawMany()
 
             const user_ids = infractions.map(infraction => infraction.user_id)
@@ -66,6 +67,7 @@ export default new Command('cash')
                 .where('infraction.guild_id = :guild_id', {guild_id: interaction.guild.id})
                 .andWhere('infraction.user_id = :user_id', {user_id: member.id})
                 .groupBy('penalty_name')
+                .orderBy('sum_penalty_price', 'DESC')
                 .getRawMany()
 
             const infraction_names = infractions.map(infraction => infraction.penalty_name).join('\n') || '\n'
