@@ -40,9 +40,11 @@ export default new Command('cash')
             const counts = infractions.map(infraction => infraction.count_penalty + 'x').join('\n') || '\n';
             const sums = infractions.map(infraction => infraction.sum_penalty_price + '€').join('\n') || '\n';
 
+            const sum = infractions.reduce((acc, x) => acc + x, 0)
+
             const embed = new EmbedBuilder()
                 .setColor(0x0099FF)
-                .setTitle('Cash Stats')
+                .setTitle('Cash Stats (' + sum + '€)')
                 .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
                 .setDescription('All time cash stats')
                 .addFields([
@@ -70,9 +72,11 @@ export default new Command('cash')
             const counts = infractions.map(infraction => infraction.count_penalty + 'x').join('\n') || '\n'
             const sums = infractions.map(infraction => infraction.sum_penalty_price + '€').join('\n') || '\n'
 
+            const sum = infractions.reduce((acc, x) => acc + x, 0)
+
             const embed = new EmbedBuilder()
                 .setColor(0x0099FF)
-                .setTitle('Cash Stats for ' + member.displayName)
+                .setTitle('Cash Stats for ' + member.displayName + '(' + sum + '€)')
                 .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
                 .setDescription('All time cash stats for ' + member.displayName)
                 .addFields([
