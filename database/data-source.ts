@@ -9,7 +9,7 @@ if (!process.env.DATABASE) {
 
 const database_url = process.env.DATABASE;
 
-const database = new DataSource({
+const database: DataSource = new DataSource({
     type: "sqlite",
     database: database_url,
     synchronize: true,

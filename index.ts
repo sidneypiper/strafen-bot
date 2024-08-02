@@ -18,4 +18,8 @@ initDiscordClient().then(client => {
             if (command.name === commandName)
                 await command.handle(interaction);
     });
+
+    client.rest.on('rateLimited', rateLimitInfo => {
+        console.log('Rate limited', rateLimitInfo);
+    })
 })
