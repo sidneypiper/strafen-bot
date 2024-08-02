@@ -76,7 +76,7 @@ export default new Command('cash')
 
             const embed = new EmbedBuilder()
                 .setColor(0x0099FF)
-                .setTitle('Cash Stats for ' + member.displayName + '(' + sum + '€)')
+                .setTitle('Cash Stats for ' + member.displayName + ' (' + sum + '€)')
                 .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
                 .setDescription('All time cash stats for ' + member.displayName)
                 .addFields([
