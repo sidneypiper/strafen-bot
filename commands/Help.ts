@@ -2,7 +2,7 @@ import { EmbedBuilder } from 'discord.js';
 import Command from '../core/Command';
 import { logoUrl } from '../core/Helpers';
 
-export default new Command('help')
+export default new Command('helpm')
     .setBuilder(builder => {
         return builder
             .setDescription('Show available commands.')

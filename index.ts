@@ -10,4 +10,4 @@ import { initDiscordClient } from './core/Helpers';
 
 const commands: Command[] = [Cash, List, Create, Remove, Add, Undo, Help];
 
-initDiscordClient(commands);
+initDiscordClient(commands).then(() => console.log('Discord client initialized.'));

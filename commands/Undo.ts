@@ -7,9 +7,11 @@ import { filter } from 'fuzzaldrin-plus';
 import { DataSource, Equal, ILike } from 'typeorm';
 import { Infraction } from '../database/entity/Infraction';
 
-export default new Command('undo')
+export default new Command('undom')
     .setBuilder(builder => builder.setDescription('Undo your most recent blame.'))
     .setHandler(async interaction => {
+        await interaction.deferReply({ ephemeral: true });
+
         // @ts-ignore
         const blamee = interaction.user;
 
@@ -45,11 +47,10 @@ export default new Command('undo')
 		    const row = new ActionRowBuilder<ButtonBuilder>()
 			    .addComponents(confirm, cancel);
             
-            const confirmationMessage = await interaction.reply({
+            const confirmationMessage = await interaction.editReply({
                 content: blamee.toString(),
                 embeds: [confirmationEmbed],
                 components: [row],
-                ephemeral: true
             });
 
             const collectorFilterConfirmation = i => {
@@ -60,7 +61,7 @@ export default new Command('undo')
                 // Wait for the user to confirm the undo
 	            const confirmation = await confirmationMessage.awaitMessageComponent({
                     filter: collectorFilterConfirmation,
-                    time: 60_000*1 
+                    time: 60_000
                 });
                 
                 if(confirmation.customId === 'cancel') {
@@ -113,9 +114,8 @@ export default new Command('undo')
                 return;
             }
         }).catch((e) => {
-            interaction.reply({
+            interaction.editReply({
                 content: `:warning: Nothing to undo for you.`,
-                ephemeral: true
             });
         });
     });

@@ -12,6 +12,8 @@ export default new Command('cash')
                     .setDescription('The user to get information about.')
                     .setRequired(false)))
     .setHandler(async interaction => {
+        await interaction.deferReply();
+
         // @ts-ignore
         const member = interaction.options.getMember('user') || null;
 
@@ -48,7 +50,7 @@ export default new Command('cash')
 
                 ])
 
-            await interaction.reply({ embeds: [embed] });
+            await interaction.editReply({ embeds: [embed] });
         } else {
             const infractions = await database
                 .getRepository(Infraction)
@@ -77,6 +79,6 @@ export default new Command('cash')
                     { name: 'Sum', value: sums, inline: true }
                 ])
 
-            await interaction.reply({ embeds: [embed] })
+            await interaction.editReply({ embeds: [embed] })
         }
     });

@@ -4,7 +4,7 @@ import { logoUrl } from '../core/Helpers';
 import database from '../database/data-source';
 import { Penalty } from '../database/entity/Penalty';
 
-export default new Command('create')
+export default new Command('createm')
     .setBuilder(builder =>
         builder.setDescription('Add a penalty to the server.')
             .addStringOption(option =>
@@ -21,6 +21,8 @@ export default new Command('create')
                     .setRequired(true)))
 
     .setHandler(async interaction => {
+            await interaction.deferReply();
+
             // @ts-ignore
             const name = interaction.options.getString('name')
 
@@ -43,5 +45,5 @@ export default new Command('create')
                 .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
                 .setDescription('Successfully added new penalty: ' + name)
 
-            await interaction.reply({ embeds: [embed] });
+            await interaction.editReply({ embeds: [embed] });
 });

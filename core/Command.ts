@@ -55,7 +55,7 @@ export default class Command {
         if (interaction.commandName !== this.name) return;
 
         try{
-            this.handler(interaction);  
+            await this.handler(interaction);
         } catch (error) {
             await interaction.reply({
                 content: 'There was an error while executing this command!',

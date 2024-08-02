@@ -19,42 +19,25 @@ export async function initDiscordClient(commands: Command[]) {
         ]
     });
 
-    discord.once(Events.ClientReady, readyClient => {
+    discord.once(Events.ClientReady, async readyClient => {
         console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 
-        readyClient.user.setUsername('Strafenbot');
+        await readyClient.user.setUsername('Strafenbot');
         readyClient.user.setActivity('Google Chrome', { type: ActivityType.Playing });
+
+        const rest = new REST().setToken(token);
+
+        console.log('Starting refreshing application (/) commands.')
+        await rest.put(Routes.applicationCommands(clientId), {
+            body: commands.map(c => c.payload())
+        })
+        console.log('Successfully refreshed application (/) commands.')
+
+        const commandsU = await rest.get(Routes.applicationCommands(clientId));
+        console.log(commandsU)
     });
 
     await discord.login(token);
-
-    const rest = new REST().setToken(token);
-
-    await discord.guilds.fetch()
-
-    discord.guilds.cache.each(async (guild: Guild) => {
-        await rest.put(Routes.applicationGuildCommands(clientId, guild.id), { body: [] })
-            .then(() => console.log('Successfully deleted all guild commands for ' + guild.name))
-            .catch(console.error);
-    })
-
-    await rest.put(Routes.applicationCommands(clientId), { body: [] })
-        .then(() => console.log('Successfully deleted all application commands.'))
-        .catch(console.error);
-
-    try {
-        console.log('Starting refreshing application (/) commands.');
-
-        discord.guilds.cache.each(async (guild: Guild) => {
-            await rest.put(Routes.applicationGuildCommands(clientId, guild.id), { body: commands.map(c => c.payload()) })
-                .then(() => console.log('Successfully added all guild commands for ' + guild.name))
-                .catch(console.error);
-        })
-
-        console.log('Successfully refreshed application (/) commands.');
-    } catch (error) {
-        console.error(error);
-    }
 
     discord.on(Events.InteractionCreate, async interaction => {
         if (!(interaction.isCommand() || interaction.isAutocomplete())) return;

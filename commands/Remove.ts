@@ -32,6 +32,8 @@ export default new Command('remove')
         return filter(possible, input);
     })
     .setHandler(async interaction => {
+        await interaction.deferReply();
+
         // @ts-ignore
         const name = interaction.options.getString('name');
 
@@ -47,19 +49,17 @@ export default new Command('remove')
                 .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
                 .setDescription('Successfully removed penalty: ' + name)
 
-            await interaction.reply({ embeds: [embed] });
+            await interaction.editReply({ embeds: [embed] });
         }).catch((err) => {
             if(err.code === "SQLITE_CONSTRAINT") {
-                interaction.reply({
+                interaction.editReply({
                     content: `:warning: The penalty with the name ${name} is still in use and cannot be deleted.`,
-                    ephemeral: true
                 });
                 return;
             }
 
-            interaction.reply({
+            interaction.editReply({
                 content: `:warning: The penalty with the name ${name} does not exist.`,
-                ephemeral: true
             });
         });
     });

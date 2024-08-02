@@ -7,6 +7,8 @@ import Command from '../core/Command';
 export default new Command('list')
     .setBuilder(builder => builder.setDescription('Shows available penalties.'))
     .setHandler(async interaction => {
+        await interaction.deferReply()
+
         const penalties = await database
             .getRepository(Penalty)
             .createQueryBuilder('penalty')
@@ -31,5 +33,5 @@ export default new Command('list')
                 { name: 'Price', value: prices, inline: true }
             ])
 
-        await interaction.reply({ embeds: [embed] });
+        await interaction.editReply({ embeds: [embed] });
 });

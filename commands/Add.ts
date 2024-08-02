@@ -48,6 +48,7 @@ export default new Command('add')
         return filter(possible, input);
     })
     .setHandler(async interaction => {
+        await interaction.deferReply({ ephemeral: true });
 
         // @ts-ignore
         const blamee = interaction.user;
@@ -67,7 +68,7 @@ export default new Command('add')
                 .setTitle(`You successfully blamed ${blamed.displayName} for ${penalty.name}`)
                 .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
 
-            await interaction.reply({ embeds: [blamerMessage], ephemeral: true });
+            await interaction.editReply({ embeds: [blamerMessage] });
 
             const dispute = new ButtonBuilder()
                 .setCustomId('dispute')
