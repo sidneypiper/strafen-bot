@@ -50,9 +50,6 @@ export default new Command('force-add')
         const database = await getDatabase()
 
         // @ts-ignore
-        const blamee = interaction.user
-
-        // @ts-ignore
         const blamed = interaction.options.getMember('user')
 
         // @ts-ignore
@@ -64,7 +61,7 @@ export default new Command('force-add')
         }).then(async (penalty) => {
             await persistPenalty(database, interaction.guild.id, blamed.id, penalty);
             await interaction.editReply({
-                content: `:whitecheckmark: Successfully added the penalty ${penalty.name} to ${blamed.username}.`,
+                content: `Successfully added the penalty ${penalty.name} to ${blamed.displayName}.`,
             })
         }).catch(async () => {
             await interaction.editReply({
