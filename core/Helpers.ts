@@ -1,7 +1,17 @@
-import {ActivityType, Client, Events, GatewayIntentBits, Guild, REST, Routes} from "discord.js";
+import {Client, GatewayIntentBits, REST} from "discord.js";
 import type Command from "./Command";
+import Cash from "../commands/Cash";
+import List from "../commands/List";
+import Create from "../commands/Create";
+import Remove from "../commands/Remove";
+import Add from "../commands/Add";
+import Undo from "../commands/Undo";
+import Help from "../commands/Help";
 
-export async function initDiscordClient(commands: Command[]) {
+export const LOGO_URL = 'https://i.imgur.com/77nbiOw.jpeg';
+export const COMMANDS: Command[] = [Cash, List, Create, Remove, Add, Undo, Help];
+
+export async function initDiscordClient(): Promise<Client> {
     if (!process.env.DC_TOKEN)
         throw new Error('DC_TOKEN environment variable is not set');
 
@@ -9,7 +19,6 @@ export async function initDiscordClient(commands: Command[]) {
         throw new Error('DC_CLIENT_ID environment variable is not set');
 
     const token = process.env.DC_TOKEN;
-    const clientId = process.env.DC_CLIENT_ID;
 
     const discord = new Client({
         intents: [
@@ -19,36 +28,10 @@ export async function initDiscordClient(commands: Command[]) {
         ]
     });
 
-    discord.once(Events.ClientReady, async readyClient => {
-        console.log(`Ready! Logged in as ${readyClient.user.tag}`);
-
-        await readyClient.user.setUsername('Strafenbot');
-        readyClient.user.setActivity('Google Chrome', { type: ActivityType.Playing });
-
-        const rest = new REST().setToken(token);
-
-        console.log('Starting refreshing application (/) commands.')
-        await rest.put(Routes.applicationCommands(clientId), {
-            body: commands.map(c => c.payload())
-        })
-        console.log('Successfully refreshed application (/) commands.')
-
-        const commandsU = await rest.get(Routes.applicationCommands(clientId));
-        console.log(commandsU)
-    });
+    discord.rest = new REST().setToken(token);
 
     await discord.login(token);
 
-    discord.on(Events.InteractionCreate, async interaction => {
-        if (!(interaction.isCommand() || interaction.isAutocomplete())) return;
-
-        const { commandName } = interaction;
-
-        for (const command of commands) {
-            if (command.name === commandName)
-                await command.handle(interaction);
-        }
-    });
+    return discord;
 }
 
-export const logoUrl = 'https://i.imgur.com/77nbiOw.jpeg';

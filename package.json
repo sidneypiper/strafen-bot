@@ -20,7 +20,8 @@
     "typeorm": "0.3.20"
   },
   "scripts": {
-    "start": "ts-node src/index.ts",
+    "update": "bun run core/UpdateCommands.ts",
+    "start": "bun run index.ts",
     "typeorm": "typeorm-ts-node-commonjs"
   }
 }

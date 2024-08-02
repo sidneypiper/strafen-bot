@@ -1,11 +1,11 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, Emoji, Poll, PollLayoutType } from 'discord.js';
+import {ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, PollLayoutType} from 'discord.js';
 import Command from '../core/Command';
-import { logoUrl } from '../core/Helpers';
-import database from '../database/data-source';
-import { Penalty } from '../database/entity/Penalty';
-import { filter } from 'fuzzaldrin-plus';
-import { DataSource, Equal, ILike } from 'typeorm';
-import { Infraction } from '../database/entity/Infraction';
+import {LOGO_URL} from '../core/Helpers';
+import getDatabase from '../database/data-source';
+import {Penalty} from '../database/entity/Penalty';
+import {filter} from 'fuzzaldrin-plus';
+import {DataSource, Equal, ILike} from 'typeorm';
+import {Infraction} from '../database/entity/Infraction';
 
 const TIME_TO_DISPUTE = 60_000 * 1;
 const TIME_TO_VOTE = 1_000 * 60;
@@ -33,6 +33,8 @@ export default new Command('add')
                     .setAutocomplete(true))
     })
     .setAutocomplete(async interaction => {
+        const database = await getDatabase();
+
         const penalties = await database.manager.find(Penalty, {
             select: ['name'],
             where: {
@@ -48,7 +50,9 @@ export default new Command('add')
         return filter(possible, input);
     })
     .setHandler(async interaction => {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ephemeral: true});
+
+        const database = await getDatabase();
 
         // @ts-ignore
         const blamee = interaction.user;
@@ -66,9 +70,9 @@ export default new Command('add')
             const blamerMessage = new EmbedBuilder()
                 .setColor(0x0099FF)
                 .setTitle(`You successfully blamed ${blamed.displayName} for ${penalty.name}`)
-                .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
+                .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
 
-            await interaction.editReply({ embeds: [blamerMessage] });
+            await interaction.editReply({embeds: [blamerMessage]});
 
             const dispute = new ButtonBuilder()
                 .setCustomId('dispute')
@@ -81,7 +85,7 @@ export default new Command('add')
             const publicBlameEmbed = new EmbedBuilder()
                 .setColor(0x0099FF)
                 .setTitle(`Arghhh ${blamed.displayName}! ${blamee.displayName} blamed you for ${penalty.name}`)
-                .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
+                .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
                 .setDescription('If you think this is wrong, click the button below to dispute the blame. You only have ' + Math.floor(TIME_TO_DISPUTE / 60_000.0) + ' minutes to do so though!')
 
             const publicBlame = await interaction.followUp({
@@ -96,12 +100,12 @@ export default new Command('add')
 
             try {
                 // Wait for the user to dispute the blame
-                await publicBlame.awaitMessageComponent({ filter: collectorFilterDispute, time: TIME_TO_DISPUTE });
+                await publicBlame.awaitMessageComponent({filter: collectorFilterDispute, time: TIME_TO_DISPUTE});
 
                 const disputeEmbedTie = new EmbedBuilder()
                     .setColor(0x0099FF)
                     .setTitle(`You disputed the blame ${blamed.displayName}!`)
-                    .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
+                    .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
                     .setDescription(`You now have the chance to tell others why you shouldn't be penalized for ${penalty.name}.\n\nOutsiders can now vote for ${Math.floor(TIME_TO_VOTE / 60_000.00)} minutes on whether you are guilty or not.\n\nAs soon as one outsider votes, the voting will end and the result will be displayed.`);
 
                 const confirmationVote = await publicBlame.edit({
@@ -111,17 +115,17 @@ export default new Command('add')
                 });
 
                 const poll = {
-                    question: { text: `Is ${blamed.displayName} guilty of ${penalty.name}? (1min)` },
+                    question: {text: `Is ${blamed.displayName} guilty of ${penalty.name}? (1min)`},
                     answers: [
-                        { text: 'Yes', emoji: '👮' },
-                        { text: 'No', emoji: '⚖️' }
+                        {text: 'Yes', emoji: '👮'},
+                        {text: 'No', emoji: '⚖️'}
                     ],
                     allowMultiselect: false,
                     duration: 1,
                     layoutType: PollLayoutType.Default
                 }
 
-                const voteMessage = await interaction.followUp({ poll })
+                const voteMessage = await interaction.followUp({poll})
 
                 setTimeout(async () => {
                     const vote = await voteMessage.poll.end()
@@ -134,21 +138,21 @@ export default new Command('add')
                             resultEmbed = new EmbedBuilder()
                                 .setColor(0x0099FF)
                                 .setTitle(`The crowd is cheering for you!`)
-                                .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
+                                .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
                                 .setDescription(`You are free to go. (${penalty.name})`);
                             break
                         case 0:
                             resultEmbed = new EmbedBuilder()
                                 .setColor(0x0099FF)
                                 .setTitle(`In dubio pro reo!`)
-                                .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
+                                .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
                                 .setDescription(`You are free to go. (${penalty.name})`);
                             break
                         case 1:
                             resultEmbed = new EmbedBuilder()
                                 .setColor(0x0099FF)
                                 .setTitle(`Unfortunately, you have been found guilty!`)
-                                .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
+                                .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
                                 .setDescription(`You are now officially blamed for ${penalty.name}.`);
                             await persistPenalty(database, interaction.guild.id, blamed.id, penalty);
                             break
@@ -167,7 +171,7 @@ export default new Command('add')
                 const notInTimeEmbed = new EmbedBuilder()
                     .setColor(0x0099FF)
                     .setTitle(`Too late ${blamed.displayName}!`)
-                    .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
+                    .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
                     .setDescription(`You didn't dispute the blame in time. You are now officially blamed for ${penalty.name}.`);
 
                 await publicBlame.edit({

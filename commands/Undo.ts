@@ -1,16 +1,16 @@
-import { ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder } from 'discord.js';
+import {ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder} from 'discord.js';
 import Command from '../core/Command';
-import { logoUrl } from '../core/Helpers';
-import database from '../database/data-source';
-import { Penalty } from '../database/entity/Penalty';
-import { filter } from 'fuzzaldrin-plus';
-import { DataSource, Equal, ILike } from 'typeorm';
-import { Infraction } from '../database/entity/Infraction';
+import {LOGO_URL} from '../core/Helpers';
+import getDatabase from '../database/data-source';
+import {Equal} from 'typeorm';
+import {Infraction} from '../database/entity/Infraction';
 
-export default new Command('undom')
+export default new Command('undo')
     .setBuilder(builder => builder.setDescription('Undo your most recent blame.'))
     .setHandler(async interaction => {
-        await interaction.deferReply({ ephemeral: true });
+        await interaction.deferReply({ephemeral: true});
+
+        const database = await getDatabase();
 
         // @ts-ignore
         const blamee = interaction.user;
@@ -32,21 +32,21 @@ export default new Command('undom')
             const confirmationEmbed = new EmbedBuilder()
                 .setColor(0x0099FF)
                 .setTitle(`Are you sure you want to undo you blaming ${blamed.displayName} for ${infraction.penalty.name}?`)
-                .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
-            
+                .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
+
             const confirm = new ButtonBuilder()
-			    .setCustomId('confirm')
-			    .setLabel('Confirm')
-			    .setStyle(ButtonStyle.Success);
+                .setCustomId('confirm')
+                .setLabel('Confirm')
+                .setStyle(ButtonStyle.Success);
 
             const cancel = new ButtonBuilder()
                 .setCustomId('cancel')
                 .setLabel('Cancel')
                 .setStyle(ButtonStyle.Danger);
 
-		    const row = new ActionRowBuilder<ButtonBuilder>()
-			    .addComponents(confirm, cancel);
-            
+            const row = new ActionRowBuilder<ButtonBuilder>()
+                .addComponents(confirm, cancel);
+
             const confirmationMessage = await interaction.editReply({
                 content: blamee.toString(),
                 embeds: [confirmationEmbed],
@@ -59,17 +59,17 @@ export default new Command('undom')
 
             try {
                 // Wait for the user to confirm the undo
-	            const confirmation = await confirmationMessage.awaitMessageComponent({
+                const confirmation = await confirmationMessage.awaitMessageComponent({
                     filter: collectorFilterConfirmation,
                     time: 60_000
                 });
-                
-                if(confirmation.customId === 'cancel') {
+
+                if (confirmation.customId === 'cancel') {
                     const confirmationCancelEmbed = new EmbedBuilder()
                         .setColor(0x0099FF)
                         .setTitle(`You decided not to undo the blame!`)
-                        .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl });
-                    
+                        .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL});
+
                     await confirmationMessage.edit({
                         content: null,
                         embeds: [confirmationCancelEmbed],
@@ -77,12 +77,12 @@ export default new Command('undom')
                     });
 
                     return;
-                }else if(confirmation.customId === 'confirm') {
+                } else if (confirmation.customId === 'confirm') {
                     const confirmationSuccessEmbed = new EmbedBuilder()
                         .setColor(0x0099FF)
                         .setTitle(`You undid the blame! Really nice of you ${blamed.displayName}!`)
-                        .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl });
-                    
+                        .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL});
+
                     database.getRepository(Infraction).remove(infraction)
                         .then(async () => {
                             await confirmationMessage.edit({
@@ -91,11 +91,11 @@ export default new Command('undom')
                                 components: []
                             });
                         }).catch(async () => {
-                            await interaction.reply({
-                                content: `:warning: Something went wrong while trying to undo the blame.`,
-                                ephemeral: true
-                            });
+                        await interaction.reply({
+                            content: `:warning: Something went wrong while trying to undo the blame.`,
+                            ephemeral: true
                         });
+                    });
 
                     return;
                 }
@@ -103,17 +103,17 @@ export default new Command('undom')
                 const notInTimeEmbed = new EmbedBuilder()
                     .setColor(0x0099FF)
                     .setTitle(`You didn't confirm in time, the undo was canceled!`)
-                    .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
+                    .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
 
-	            await confirmationMessage.edit({
+                await confirmationMessage.edit({
                     content: null,
                     embeds: [notInTimeEmbed],
                     components: []
                 })
-                
+
                 return;
             }
-        }).catch((e) => {
+        }).catch(() => {
             interaction.editReply({
                 content: `:warning: Nothing to undo for you.`,
             });

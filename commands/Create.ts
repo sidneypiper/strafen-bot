@@ -1,10 +1,10 @@
-import { EmbedBuilder } from 'discord.js';
+import {EmbedBuilder} from 'discord.js';
 import Command from '../core/Command';
-import { logoUrl } from '../core/Helpers';
-import database from '../database/data-source';
-import { Penalty } from '../database/entity/Penalty';
+import {LOGO_URL} from '../core/Helpers';
+import getDatabase from '../database/data-source';
+import {Penalty} from '../database/entity/Penalty';
 
-export default new Command('createm')
+export default new Command('create')
     .setBuilder(builder =>
         builder.setDescription('Add a penalty to the server.')
             .addStringOption(option =>
@@ -21,29 +21,31 @@ export default new Command('createm')
                     .setRequired(true)))
 
     .setHandler(async interaction => {
-            await interaction.deferReply();
+        await interaction.deferReply();
 
-            // @ts-ignore
-            const name = interaction.options.getString('name')
+        const database = await getDatabase();
 
-            // @ts-ignore
-            const description = interaction.options.getString('description')
+        // @ts-ignore
+        const name = interaction.options.getString('name')
 
-            // @ts-ignore
-            const price = interaction.options.getNumber('price')
+        // @ts-ignore
+        const description = interaction.options.getString('description')
 
-            await database.manager.insert(Penalty, {
-                name: name,
-                description: description,
-                price: price,
-                guild_id: interaction.guild.id
-            });
+        // @ts-ignore
+        const price = interaction.options.getNumber('price')
 
-            const embed = new EmbedBuilder()
-                .setColor(0x0099FF)
-                .setTitle('New penalty')
-                .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
-                .setDescription('Successfully added new penalty: ' + name)
+        await database.manager.insert(Penalty, {
+            name: name,
+            description: description,
+            price: price,
+            guild_id: interaction.guild.id
+        });
 
-            await interaction.editReply({ embeds: [embed] });
-});
+        const embed = new EmbedBuilder()
+            .setColor(0x0099FF)
+            .setTitle('New penalty')
+            .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
+            .setDescription('Successfully added new penalty: ' + name)
+
+        await interaction.editReply({embeds: [embed]});
+    });

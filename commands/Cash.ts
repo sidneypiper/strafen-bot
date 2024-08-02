@@ -1,8 +1,8 @@
-import { EmbedBuilder } from 'discord.js';
+import {EmbedBuilder} from 'discord.js';
 import Command from '../core/Command';
-import { logoUrl } from '../core/Helpers';
-import database from '../database/data-source';
-import { Infraction } from '../database/entity/Infraction';
+import {LOGO_URL} from '../core/Helpers';
+import getDatabase from '../database/data-source';
+import {Infraction} from '../database/entity/Infraction';
 
 export default new Command('cash')
     .setBuilder(builder =>
@@ -13,6 +13,8 @@ export default new Command('cash')
                     .setRequired(false)))
     .setHandler(async interaction => {
         await interaction.deferReply();
+
+        const database = await getDatabase();
 
         // @ts-ignore
         const member = interaction.options.getMember('user') || null;
@@ -25,14 +27,14 @@ export default new Command('cash')
                 .select('infraction.user_id', 'user_id')
                 .addSelect('COUNT(*)', 'count_penalty')
                 .addSelect('SUM(penalty.price)', 'sum_penalty_price')
-                .where('infraction.guild_id = :guild_id', { guild_id: interaction.guild.id })
+                .where('infraction.guild_id = :guild_id', {guild_id: interaction.guild.id})
                 .groupBy('infraction.user_id')
                 .getRawMany()
 
             const user_ids = infractions.map(infraction => infraction.user_id)
 
             // @ts-ignore
-            const members = await interaction.guild.members.fetch({ user: user_ids, force: true })
+            const members = await interaction.guild.members.fetch({user: user_ids, force: true})
 
             const names = infractions.map(infraction => members.get(infraction.user_id).displayName).join('\n') || '\n';
             const counts = infractions.map(infraction => infraction.count_penalty + 'x').join('\n') || '\n';
@@ -41,16 +43,16 @@ export default new Command('cash')
             const embed = new EmbedBuilder()
                 .setColor(0x0099FF)
                 .setTitle('Cash Stats')
-                .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
+                .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
                 .setDescription('All time cash stats')
                 .addFields([
-                    { name: 'User', value: names, inline: true },
-                    { name: 'Count', value: counts, inline: true },
-                    { name: 'Sum', value: sums, inline: true }
+                    {name: 'User', value: names, inline: true},
+                    {name: 'Count', value: counts, inline: true},
+                    {name: 'Sum', value: sums, inline: true}
 
                 ])
 
-            await interaction.editReply({ embeds: [embed] });
+            await interaction.editReply({embeds: [embed]});
         } else {
             const infractions = await database
                 .getRepository(Infraction)
@@ -59,8 +61,8 @@ export default new Command('cash')
                 .select('penalty.name', 'penalty_name')
                 .addSelect('COUNT(*)', 'count_penalty')
                 .addSelect('SUM(penalty.price)', 'sum_penalty_price')
-                .where('infraction.guild_id = :guild_id', { guild_id: interaction.guild.id })
-                .andWhere('infraction.user_id = :user_id', { user_id: member.id })
+                .where('infraction.guild_id = :guild_id', {guild_id: interaction.guild.id})
+                .andWhere('infraction.user_id = :user_id', {user_id: member.id})
                 .groupBy('penalty_name')
                 .getRawMany()
 
@@ -71,14 +73,14 @@ export default new Command('cash')
             const embed = new EmbedBuilder()
                 .setColor(0x0099FF)
                 .setTitle('Cash Stats for ' + member.displayName)
-                .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
+                .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
                 .setDescription('All time cash stats for ' + member.displayName)
                 .addFields([
-                    { name: 'Infraction', value: infraction_names, inline: true },
-                    { name: 'Count', value: counts, inline: true },
-                    { name: 'Sum', value: sums, inline: true }
+                    {name: 'Infraction', value: infraction_names, inline: true},
+                    {name: 'Count', value: counts, inline: true},
+                    {name: 'Sum', value: sums, inline: true}
                 ])
 
-            await interaction.editReply({ embeds: [embed] })
+            await interaction.editReply({embeds: [embed]})
         }
     });

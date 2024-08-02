@@ -1,6 +1,6 @@
 import { EmbedBuilder } from 'discord.js';
 import Command from '../core/Command';
-import { logoUrl } from '../core/Helpers';
+import { LOGO_URL } from '../core/Helpers';
 
 export default new Command('helpm')
     .setBuilder(builder => {
@@ -21,7 +21,7 @@ export default new Command('helpm')
         const embed = new EmbedBuilder()
             .setColor(0x0099FF)
             .setTitle('Available Commands')
-            .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
+            .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL })
             .setDescription('Use them wisely and responsibly!')
             .addFields([
                 { name: 'Command', value: Object.keys(commands).join('\n'), inline: true },

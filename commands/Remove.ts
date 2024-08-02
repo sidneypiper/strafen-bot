@@ -1,10 +1,10 @@
-import { EmbedBuilder } from 'discord.js';
+import {EmbedBuilder} from 'discord.js';
 import Command from '../core/Command';
-import { logoUrl } from '../core/Helpers';
-import database from '../database/data-source';
-import { Penalty } from '../database/entity/Penalty';
-import { filter } from 'fuzzaldrin-plus';
-import { Equal, ILike } from 'typeorm';
+import {LOGO_URL} from '../core/Helpers';
+import getDatabase from '../database/data-source';
+import {Penalty} from '../database/entity/Penalty';
+import {filter} from 'fuzzaldrin-plus';
+import {Equal, ILike} from 'typeorm';
 
 export default new Command('remove')
     .setBuilder(builder => {
@@ -17,6 +17,8 @@ export default new Command('remove')
                     .setAutocomplete(true))
     })
     .setAutocomplete(async interaction => {
+        const database = await getDatabase();
+
         const penalties = await database.manager.find(Penalty, {
             select: ['name'],
             where: {
@@ -24,15 +26,17 @@ export default new Command('remove')
             }
         });
 
-        const input = interaction.options.getFocused(); 
+        const input = interaction.options.getFocused();
         const possible = penalties.map(penalty => penalty.name);
 
-        if(input === null || input.length === 0) return possible;
+        if (input === null || input.length === 0) return possible;
 
         return filter(possible, input);
     })
     .setHandler(async interaction => {
         await interaction.deferReply();
+
+        const database = await getDatabase();
 
         // @ts-ignore
         const name = interaction.options.getString('name');
@@ -46,12 +50,12 @@ export default new Command('remove')
             const embed = new EmbedBuilder()
                 .setColor(0x0099FF)
                 .setTitle('Removed penalty')
-                .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: logoUrl })
+                .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
                 .setDescription('Successfully removed penalty: ' + name)
 
-            await interaction.editReply({ embeds: [embed] });
+            await interaction.editReply({embeds: [embed]});
         }).catch((err) => {
-            if(err.code === "SQLITE_CONSTRAINT") {
+            if (err.code === "SQLITE_CONSTRAINT") {
                 interaction.editReply({
                     content: `:warning: The penalty with the name ${name} is still in use and cannot be deleted.`,
                 });

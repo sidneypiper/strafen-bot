@@ -1,13 +1,21 @@
-import Create from './commands/Create';
-import Add from './commands/Add';
-import Cash from './commands/Cash';
-import List from './commands/List';
-import Remove from './commands/Remove';
-import Undo from './commands/Undo';
-import Help from './commands/Help';
-import type Command from './core/Command.ts';
-import { initDiscordClient } from './core/Helpers';
+import {COMMANDS, initDiscordClient} from './core/Helpers';
+import {ActivityType, Events} from "discord.js";
 
-const commands: Command[] = [Cash, List, Create, Remove, Add, Undo, Help];
+initDiscordClient().then(client => {
+    client.once(Events.ClientReady, async readyClient => {
+        console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 
-initDiscordClient(commands).then(() => console.log('Discord client initialized.'));
+        await readyClient.user.setUsername('Strafenbot');
+        readyClient.user.setActivity('Google Chrome', {type: ActivityType.Playing});
+    });
+
+    client.on(Events.InteractionCreate, async interaction => {
+        if (!(interaction.isCommand() || interaction.isAutocomplete())) return;
+
+        const {commandName} = interaction;
+
+        for (const command of COMMANDS)
+            if (command.name === commandName)
+                await command.handle(interaction);
+    });
+})
