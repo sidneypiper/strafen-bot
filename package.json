@@ -4,8 +4,9 @@
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
-    "ts-node": "10.9.1",
     "@types/node": "^16.11.10",
+    "@vue/babel-plugin-jsx": "^1.2.2",
+    "ts-node": "10.9.1",
     "typescript": "4.5.2"
   },
   "peerDependencies": {
@@ -15,9 +16,14 @@
     "@types/fuzzaldrin-plus": "^0.6.5",
     "discord.js": "^14.15.2",
     "fuzzaldrin-plus": "^0.6.0",
+    "htm": "^3.1.1",
+    "preact": "^10.23.1",
+    "preact-render-to-string": "^6.5.7",
+    "puppeteer": "^22.15.0",
     "reflect-metadata": "^0.1.13",
     "sqlite3": "^5.0.2",
-    "typeorm": "0.3.20"
+    "typeorm": "0.3.20",
+    "vue": "^3.4.35"
   },
   "scripts": {
     "update": "bun run core/UpdateCommands.ts",

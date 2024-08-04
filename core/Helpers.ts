@@ -8,9 +8,10 @@ import Add from "../commands/Add";
 import Undo from "../commands/Undo";
 import Help from "../commands/Help";
 import ForceAdd from "../commands/ForceAdd";
+import Settings from "../commands/Settings";
 
 export const LOGO_URL = 'https://i.imgur.com/77nbiOw.jpeg';
-export const COMMANDS: Command[] = [Cash, List, Create, Remove, Add, Undo, Help, ForceAdd];
+export const COMMANDS: Command[] = [Cash, List, Create, Remove, Add, Undo, Help, ForceAdd, Settings];
 
 export async function initDiscordClient(): Promise<Client> {
     if (!process.env.DC_TOKEN)

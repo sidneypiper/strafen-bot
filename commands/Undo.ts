@@ -12,7 +12,6 @@ export default new Command('undo')
 
         const database = await getDatabase();
 
-        // @ts-ignore
         const blamee = interaction.user;
 
         await database.getRepository(Infraction).findOneOrFail({

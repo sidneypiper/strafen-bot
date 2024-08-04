@@ -49,19 +49,18 @@ export default new Command('force-add')
 
         const database = await getDatabase()
 
-        // @ts-ignore
         const blamed = interaction.options.getMember('user')
+        if (!('id' in blamed)) throw new Error('Member not found.')
 
-        // @ts-ignore
         const penalty = interaction.options.getString('penalty')
 
         database.getRepository(Penalty).findOneByOrFail({
             guild_id: Equal(interaction.guild.id),
             name: ILike(penalty.trim()),
         }).then(async (penalty) => {
-            await persistPenalty(database, interaction.guild.id, blamed.id, penalty);
+            await persistPenalty(database, interaction.guild.id, blamed.id!, penalty);
             await interaction.editReply({
-                content: `Successfully added the penalty ${penalty.name} to ${blamed.displayName}.`,
+                content: `Successfully added the penalty ${penalty.name} to ${blamed.displayName!}.`,
             })
         }).catch(async () => {
             await interaction.editReply({

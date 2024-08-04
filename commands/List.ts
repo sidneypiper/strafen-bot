@@ -1,8 +1,9 @@
-import {EmbedBuilder} from 'discord.js';
+import {AttachmentBuilder, EmbedBuilder} from 'discord.js';
 import {LOGO_URL} from '../core/Helpers';
 import getDatabase from '../database/data-source';
 import {Penalty} from '../database/entity/Penalty';
 import Command from '../core/Command';
+import genImageOfList from "../views/List";
 
 export default new Command('list')
     .setBuilder(builder => builder.setDescription('Shows available penalties.'))
@@ -10,7 +11,7 @@ export default new Command('list')
         await interaction.deferReply()
 
         const database = await getDatabase();
-        
+
         const penalties = await database
             .getRepository(Penalty)
             .createQueryBuilder('penalty')
@@ -20,20 +21,16 @@ export default new Command('list')
             .where('penalty.guild_id = :guild_id', {guild_id: interaction.guild.id})
             .getRawMany()
 
-        const names = penalties.map(p => p.name).join('\n');
-        const descs = penalties.map(p => p.description.replaceAll(' ', '\xa0')).join('\n');
-        const prices = penalties.map(p => p.price + '€').join('\n');
+        const imageBuffer = await genImageOfList(penalties)
+
+        const attachment = new AttachmentBuilder(imageBuffer, {name: "penalties.png"})
 
         const embed = new EmbedBuilder()
             .setColor(0x0099FF)
             .setTitle('Penalties List')
             .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
-            .setDescription('All available penalties')
-            .addFields([
-                {name: 'Penalty', value: names, inline: true},
-                {name: 'Description', value: descs, inline: true},
-                {name: 'Price', value: prices, inline: true}
-            ])
+            .setDescription('All available penalties. Click the image below to enlarge.')
+            .setImage('attachment://penalties.png')
 
-        await interaction.editReply({embeds: [embed]});
+        await interaction.editReply({embeds: [embed], files: [attachment]});
     });

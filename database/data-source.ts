@@ -2,6 +2,7 @@ import "reflect-metadata"
 import {DataSource} from "typeorm"
 import {Infraction} from "./entity/Infraction"
 import {Penalty} from "./entity/Penalty"
+import {GuildSettings} from "./entity/GuildSettings";
 
 if (!process.env.DATABASE) {
     throw new Error("DATABASE environment variable is not set");
@@ -14,7 +15,7 @@ const database: DataSource = new DataSource({
     database: database_url,
     synchronize: true,
     logging: false,
-    entities: [Penalty, Infraction],
+    entities: [Penalty, Infraction, GuildSettings],
     migrations: [],
     subscribers: [],
 });

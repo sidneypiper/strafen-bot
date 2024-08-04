@@ -38,7 +38,6 @@ export default new Command('remove')
 
         const database = await getDatabase();
 
-        // @ts-ignore
         const name = interaction.options.getString('name');
 
         database.getRepository(Penalty).findOneByOrFail({
