@@ -131,23 +131,23 @@ export default new Command('add')
                         case -1:
                             resultEmbed = new EmbedBuilder()
                                 .setColor(0x0099FF)
-                                .setTitle(`The crowd is cheering for you!`)
                                 .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
-                                .setDescription(`You are free to go. (${penalty.name})`)
+                                .setTitle(`The crowd is cheering for you, ${blamed.displayName}! You are free to go.`)
+                                .setDescription(`${blamee.displayName} failed to blame you for ${penalty.name}.`)
                             break
                         case 0:
                             resultEmbed = new EmbedBuilder()
                                 .setColor(0x0099FF)
-                                .setTitle(`In dubio pro reo!`)
                                 .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
-                                .setDescription(`You are free to go. (${penalty.name})`)
+                                .setTitle(`In dubio pro reo, ${blamed.displayName}!`)
+                                .setDescription(`${blamee.displayName} failed to blame you for ${penalty.name}.`)
                             break
                         case 1:
                             resultEmbed = new EmbedBuilder()
                                 .setColor(0x0099FF)
-                                .setTitle(`Unfortunately, you have been found guilty!`)
                                 .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
-                                .setDescription(`You are now officially blamed for ${penalty.name}.`)
+                                .setTitle(`Unfortunately, you have been found guilty ${blamed.displayName}!`)
+                                .setDescription(`${blamee.displayName} successfully blamed you for ${penalty.name} which costs you ${penalty.price}€.`)
                             await persistPenalty(database, interaction.guild.id, blamed.id, penalty)
                             break
                     }
@@ -157,16 +157,15 @@ export default new Command('add')
                         embeds: [resultEmbed],
                         components: []
                     })
-
-                    await vote.delete()
                 }, TIME_TO_VOTE)
 
             } catch (e) {
                 const notInTimeEmbed = new EmbedBuilder()
                     .setColor(0x0099FF)
-                    .setTitle(`Too late ${blamed.displayName}!`)
                     .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
-                    .setDescription(`You didn't dispute the blame in time. You are now officially blamed for ${penalty.name}.`)
+                    .setTitle(`Too late ${blamed.displayName}!`)
+                    .setDescription(`${blamee.displayName} blamed you for ${penalty.name} and you didn't dispute the blame in time. You are now officially blamed for ${penalty.name} which costs you ${penalty.price}€.`)
+
 
                 await publicBlame.edit({
                     content: null,
