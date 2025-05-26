@@ -26,3 +26,9 @@ To run:
 bun run index.ts
 ```
 
+## Contributing
+> Thank you for considering to contribute to the Strafenbot! If you want to partake in this journey, please follow this rough outline.
+- Fork repository
+- Create new branch, preferably after consistent naming schema (`feature/xy`, `fix/xy`, ...)
+- Make your changes and commit them using (Conventional commits)[https://www.conventionalcommits.org/en/v1.0.0/]
+- Create a pull request with a descriptive title and tell us what you changed and why

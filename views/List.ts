@@ -1,7 +1,7 @@
-import {Penalty} from "../database/entity/Penalty";
-import puppeteer from "puppeteer";
-import {render} from 'preact-render-to-string';
-import {html} from 'htm/preact';
+import { Penalty } from "../database/entity/Penalty";
+import getBrowser from "../core/Browser"
+import { render } from 'preact-render-to-string';
+import { html } from 'htm/preact';
 import Table from "./Table";
 
 export default async function (penalties: Penalty[]): Promise<Buffer> {
@@ -17,7 +17,7 @@ export default async function (penalties: Penalty[]): Promise<Buffer> {
         <${Table} headers=${headers} rows=${rows}/>`)
 
     try {
-        const browser = await puppeteer.launch();
+        const browser = await getBrowser()
         const page = await browser.newPage();
 
         await page.setViewport({
@@ -31,7 +31,7 @@ export default async function (penalties: Penalty[]): Promise<Buffer> {
         await page.waitForSelector(selector);
         const table = await page.$(selector);
 
-        const screenshotBuffer = await table.screenshot({type: 'png'});
+        const screenshotBuffer = await table.screenshot({ type: 'png' });
 
         await browser.close();
 
