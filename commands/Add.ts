@@ -157,6 +157,8 @@ export default new Command('add')
                         embeds: [resultEmbed],
                         components: []
                     })
+
+                    await vote.delete();
                 }, TIME_TO_VOTE)
 
             } catch (e) {
