@@ -37,6 +37,12 @@ initDiscordClient().then(client => {
 
     client.on(Events.InteractionCreate, async interaction => {
         if (!(interaction.isChatInputCommand() || interaction.isAutocomplete())) return;
+        if (!interaction.guild) {
+            if (interaction.isChatInputCommand()) {
+                await interaction.reply({content: 'I only work in servers, not in DMs.', ephemeral: true});
+            }
+            return;
+        }
 
         const {commandName} = interaction;
 
