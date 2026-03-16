@@ -156,7 +156,7 @@ export async function genLeaderboardImage(entries: LeaderboardEntry[]): Promise<
         h('span', {style: {color: Colors.coolSteel, fontSize: '20px', marginLeft: '6px'}}, 'total'),
     )
 
-    const root = h('div', {style: {display: 'flex', flexDirection: 'column', width: '100%', backgroundColor: Colors.shadowGrey}},
+    const root = h('div', {style: {display: 'flex', flexDirection: 'column', width: '100%', backgroundColor: Colors.chatBackground}},
         podiumSection,
         ...(restSection ? [restSection] : []),
         summarySection,
