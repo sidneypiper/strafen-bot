@@ -12,28 +12,45 @@ interface PenaltyRow {
     price: number
 }
 
+const WIDTH = 900
+const MAX_HEIGHT = 16000
+
 export default async function genImageOfList(penalties: PenaltyRow[]): Promise<Buffer> {
     const headers = ['Name', 'Description', 'Price']
-    const rows = penalties.map(p => ({
-        name: p.name,
-        description: p.description,
-        price: p.price
-    }))
+    const rows = penalties.length > 0
+        ? penalties.map(p => ({name: p.name, description: p.description, price: p.price}))
+        : [{name: 'No penalties', description: '-', price: 0}]
 
     const element = Table({headers, rows})
 
+    // Render at generous height first
     const svg = await satori(element as any, {
-        width: 1600,
-        height: Math.max(200, 96 + rows.length * 96 + 48 * 2),
+        width: WIDTH,
+        height: MAX_HEIGHT,
         fonts: [{
             name: 'Inter',
-            data: interFont,
+            data: new Uint8Array(interFont).buffer,
             weight: 400,
             style: 'normal',
         }],
     })
 
+    // Use innerBBox to find the real content height, then crop
     const resvg = new Resvg(svg)
-    const pngData = resvg.render()
+    const bbox = resvg.innerBBox()
+    const contentHeight = Math.ceil((bbox?.y ?? 0) + (bbox?.height ?? MAX_HEIGHT)) + 48
+
+    const croppedSvg = await satori(element as any, {
+        width: WIDTH,
+        height: contentHeight,
+        fonts: [{
+            name: 'Inter',
+            data: new Uint8Array(interFont).buffer,
+            weight: 400,
+            style: 'normal',
+        }],
+    })
+
+    const pngData = new Resvg(croppedSvg).render()
     return Buffer.from(pngData.asPng())
 }
