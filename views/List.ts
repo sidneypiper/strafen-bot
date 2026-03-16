@@ -1,44 +1,30 @@
-import { Penalty } from "../database/entity/Penalty";
-import getBrowser from "../core/Browser"
-import { render } from 'preact-render-to-string';
-import { html } from 'htm/preact';
-import Table from "./Table";
+import satori from "satori"
+import {Resvg} from "@resvg/resvg-js"
+import Table from "./Table"
 
-export default async function (penalties: Penalty[]): Promise<Buffer> {
-
-    const headers = ['Name', 'Description', 'Price']
-    const rows = penalties.map(penalty => ({
-        name: penalty.name,
-        description: penalty.description,
-        price: penalty.price
-    }))
-
-    const htmlString = render(html`
-        <${Table} headers=${headers} rows=${rows}/>`)
-
-    try {
-        const browser = await getBrowser()
-        const page = await browser.newPage();
-
-        await page.setViewport({
-            width: 2560,
-            height: 4000
-        });
-
-        await page.setContent(htmlString);
-
-        const selector = '#table';
-        await page.waitForSelector(selector);
-        const table = await page.$(selector);
-
-        const screenshotBuffer = await table.screenshot({ type: 'png' });
-
-        await browser.close();
-
-        return screenshotBuffer;
-    } catch (e) {
-        console.error(e);
-        throw e;
-    }
+interface PenaltyRow {
+    name: string
+    description: string
+    price: number
 }
 
+export default async function genImageOfList(penalties: PenaltyRow[]): Promise<Buffer> {
+    const headers = ['Name', 'Description', 'Price']
+    const rows = penalties.map(p => ({
+        name: p.name,
+        description: p.description,
+        price: p.price
+    }))
+
+    const element = Table({headers, rows})
+
+    const svg = await satori(element as any, {
+        width: 1600,
+        height: Math.max(200, 96 + rows.length * 96 + 48 * 2),
+        fonts: [],
+    })
+
+    const resvg = new Resvg(svg)
+    const pngData = resvg.render()
+    return Buffer.from(pngData.asPng())
+}

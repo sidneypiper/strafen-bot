@@ -1,38 +1,68 @@
-import {html} from "htm/preact";
-import Layout from "./Layout";
-
 interface TableData {
     headers: string[]
     rows: { [key: string]: any }[]
 }
 
-export default (props: TableData) => {
-    console.log(props)
-    return html`
-        <${Layout}>
-            <div id="table" class="relative overflow-x-auto p-12 bg-gray-800">
-                <table style="font-size: 3rem; line-height: 1.2"
-                       class="w-full text-left rtl:text-right text-gray-400">
-                    <thead class="uppercase text-gray-400">
-                    <tr>
-                        ${props.headers.map(header => html`
-                            <th scope="col" class="px-12 py-6 bg-gray-700 first:rounded-l-3xl last:rounded-r-3xl">
-                                ${header}
-                            </th>
-                        `)}
-                    </tr>
-                    </thead>
-                    <tbody>
-                    ${props.rows.map(row => html`
-                        <tr class="border-b-4 border-gray-700 last-child:border-b-none">
-                            ${Object.keys(row).map(key => html`
-                                <td class="px-12 py-6 text-white first:font-medium">${row[key]}</td>
-                            `)}
-                        </tr>
-                    `)}
-                    </tbody>
-                </table>
-            </div>
-        <//>
-    `
+function h(type: string, props: Record<string, any> | null, ...children: any[]): any {
+    return {type, props: {...props, children: children.length === 1 ? children[0] : children}}
+}
+
+export default function Table(props: TableData): any {
+    return h('div', {
+        style: {
+            display: 'flex',
+            flexDirection: 'column',
+            padding: '48px',
+            backgroundColor: '#1f2937',
+            borderRadius: '16px',
+        }
+    },
+        // Header row
+        h('div', {
+            style: {
+                display: 'flex',
+                flexDirection: 'row',
+                backgroundColor: '#374151',
+                borderRadius: '24px',
+                marginBottom: '8px',
+            }
+        },
+            ...props.headers.map(header =>
+                h('div', {
+                    style: {
+                        display: 'flex',
+                        flex: 1,
+                        padding: '24px 48px',
+                        color: '#9ca3af',
+                        fontSize: '48px',
+                        fontWeight: 700,
+                        textTransform: 'uppercase' as const,
+                    }
+                }, header)
+            )
+        ),
+        // Data rows
+        ...props.rows.map((row, i) =>
+            h('div', {
+                style: {
+                    display: 'flex',
+                    flexDirection: 'row',
+                    borderBottom: i < props.rows.length - 1 ? '4px solid #374151' : 'none',
+                }
+            },
+                ...Object.keys(row).map((key, j) =>
+                    h('div', {
+                        style: {
+                            display: 'flex',
+                            flex: 1,
+                            padding: '24px 48px',
+                            color: '#ffffff',
+                            fontSize: '48px',
+                            fontWeight: j === 0 ? 500 : 400,
+                        }
+                    }, String(row[key]))
+                )
+            )
+        )
+    )
 }
