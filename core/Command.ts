@@ -4,6 +4,7 @@ import {
     SlashCommandBuilder,
     SlashCommandOptionsOnlyBuilder,
     SlashCommandSubcommandsOnlyBuilder,
+    MessageFlags,
 } from "discord.js";
 
 /**
@@ -64,7 +65,7 @@ export default class Command {
             try {
                 await interaction.reply({
                     content: ':warning: There was an error while executing this command!',
-                    ephemeral: true
+                    flags: MessageFlags.Ephemeral
                 });
             } catch (replyError: any) {
                 if (replyError.code === "InteractionAlreadyReplied") {

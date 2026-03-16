@@ -1,4 +1,4 @@
-import {GuildMember} from 'discord.js'
+import {GuildMember, MessageFlags} from 'discord.js'
 import Command from '../core/Command'
 import db from '../database/data-source'
 import {filter} from 'fuzzaldrin-plus'
@@ -28,7 +28,7 @@ export default new Command('force-add')
         return filter(possible, input)
     })
     .setHandler(async interaction => {
-        await interaction.deferReply({ephemeral: true})
+        await interaction.deferReply({flags: MessageFlags.Ephemeral})
 
         const guild = interaction.guild!
         const blamed = interaction.options.getMember('user') as GuildMember | null

@@ -1,4 +1,4 @@
-import {ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder} from 'discord.js';
+import {ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, MessageFlags} from 'discord.js';
 import Command from '../core/Command';
 import {LOGO_URL} from '../core/Helpers';
 import db from '../database/data-source';
@@ -6,7 +6,7 @@ import db from '../database/data-source';
 export default new Command('undo')
     .setBuilder(builder => builder.setDescription('Undo your most recent blame.'))
     .setHandler(async interaction => {
-        await interaction.deferReply({ephemeral: true});
+        await interaction.deferReply({flags: MessageFlags.Ephemeral});
 
         const guild = interaction.guild!;
         const blamee = interaction.user;

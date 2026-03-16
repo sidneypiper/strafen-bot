@@ -1,4 +1,4 @@
-import {ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, GuildMember, PollLayoutType} from 'discord.js'
+import {ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, GuildMember, MessageFlags, PollLayoutType} from 'discord.js'
 import Command from '../core/Command'
 import {LOGO_URL} from '../core/Helpers'
 import db from '../database/data-source'
@@ -37,7 +37,7 @@ export default new Command('add')
         return filter(possible, input)
     })
     .setHandler(async interaction => {
-        await interaction.deferReply({ephemeral: true})
+        await interaction.deferReply({flags: MessageFlags.Ephemeral})
 
         const guild = interaction.guild!
         const blamee = interaction.user

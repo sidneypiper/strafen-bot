@@ -1,5 +1,5 @@
 import {COMMANDS, initDiscordClient} from './core/Helpers';
-import {ActivityType, Events, TextChannel} from "discord.js";
+import {ActivityType, Events, MessageFlags, TextChannel} from "discord.js";
 import db from "./database/data-source";
 
 const SARCASTIC_GREETINGS = [
@@ -39,7 +39,7 @@ initDiscordClient().then(client => {
         if (!(interaction.isChatInputCommand() || interaction.isAutocomplete())) return;
         if (!interaction.guild) {
             if (interaction.isChatInputCommand()) {
-                await interaction.reply({content: 'I only work in servers, not in DMs.', ephemeral: true});
+                await interaction.reply({content: 'I only work in servers, not in DMs.', flags: MessageFlags.Ephemeral});
             }
             return;
         }

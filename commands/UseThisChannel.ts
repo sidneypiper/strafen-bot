@@ -1,4 +1,4 @@
-import {PermissionFlagsBits} from 'discord.js';
+import {MessageFlags, PermissionFlagsBits} from 'discord.js';
 import Command from '../core/Command';
 import db from '../database/data-source';
 
@@ -25,13 +25,13 @@ export default new Command('use-this-channel')
             db.guildSettings.setAnnouncementChannel(guild.id, null);
             await interaction.reply({
                 content: 'Announcements disabled. I\'ll stay quiet... for now.',
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         } else {
             db.guildSettings.setAnnouncementChannel(guild.id, interaction.channelId);
             await interaction.reply({
                 content: `Got it. I'll announce my glorious return in this channel from now on.`,
-                ephemeral: true
+                flags: MessageFlags.Ephemeral
             });
         }
     });
