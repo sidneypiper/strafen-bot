@@ -1,9 +1,11 @@
+import {PermissionFlagsBits} from 'discord.js';
 import Command from '../core/Command';
 import db from '../database/data-source';
 
 export default new Command('use-this-channel')
     .setBuilder(builder =>
         builder.setDescription('Set or unset this channel for bot announcements.')
+            .setDefaultMemberPermissions(PermissionFlagsBits.Administrator)
             .addBooleanOption(option =>
                 option.setName('disable')
                     .setDescription('Disable announcements for this server.')
