@@ -42,7 +42,7 @@ export default new Command('remove')
             db.penalty.delete(penalty.id);
 
             const embed = new EmbedBuilder()
-                .setColor(0x0099FF)
+                .setColor(0x7289DA)
                 .setTitle('Removed penalty')
                 .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
                 .setDescription('Successfully removed penalty: ' + name)

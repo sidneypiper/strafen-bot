@@ -1,5 +1,4 @@
-import {AttachmentBuilder, EmbedBuilder} from 'discord.js';
-import {LOGO_URL} from '../core/Helpers';
+import {AttachmentBuilder} from 'discord.js';
 import db from '../database/data-source';
 import Command from '../core/Command';
 import genImageOfList from "../views/List";
@@ -9,19 +8,9 @@ export default new Command('list')
     .setHandler(async interaction => {
         await interaction.deferReply()
 
-        const guild = interaction.guild!;
-        const penalties = db.penalty.list(guild.id)
-
+        const penalties = db.penalty.list(interaction.guild!.id)
         const imageBuffer = await genImageOfList(penalties)
-
         const attachment = new AttachmentBuilder(imageBuffer, {name: "penalties.png"})
 
-        const embed = new EmbedBuilder()
-            .setColor(0x0099FF)
-            .setTitle('Penalties List')
-            .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
-            .setDescription('All available penalties. Click the image below to enlarge.')
-            .setImage('attachment://penalties.png')
-
-        await interaction.editReply({embeds: [embed], files: [attachment]});
+        await interaction.editReply({files: [attachment]});
     });

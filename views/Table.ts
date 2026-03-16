@@ -1,3 +1,5 @@
+import {Colors} from '../core/Colors'
+
 interface TableData {
     headers: string[]
     rows: { [key: string]: any }[]
@@ -7,8 +9,8 @@ function h(type: string, props: Record<string, any> | null, ...children: any[]):
     return {type, props: {...props, children: children.length === 1 ? children[0] : children}}
 }
 
-// Name 25%, Description 55%, Price 20%
-const COL_WIDTHS = ['25%', '55%', '20%']
+// Name 28%, Description 54%, Price 18%
+const COL_WIDTHS = ['28%', '54%', '18%']
 
 export default function Table(props: TableData): any {
     return h('div', {
@@ -16,56 +18,70 @@ export default function Table(props: TableData): any {
             display: 'flex',
             flexDirection: 'column',
             width: '100%',
-            padding: '24px',
-            backgroundColor: '#1f2937',
+            padding: '12px',
         }
     },
-        // Header row
+        // Outer card
         h('div', {
             style: {
                 display: 'flex',
-                flexDirection: 'row',
+                flexDirection: 'column',
                 width: '100%',
-                backgroundColor: '#374151',
+                backgroundColor: Colors.jetBlack,
                 borderRadius: '12px',
-                marginBottom: '8px',
+                border: `1px solid ${Colors.coolSteel}22`,
+                overflow: 'hidden',
             }
         },
-            ...props.headers.map((header, i) =>
-                h('div', {
-                    style: {
-                        display: 'flex',
-                        width: COL_WIDTHS[i] ?? `${100 / props.headers.length}%`,
-                        padding: '14px 24px',
-                        color: '#9ca3af',
-                        fontSize: '28px',
-                        fontWeight: 700,
-                        textTransform: 'uppercase' as const,
-                    }
-                }, header)
-            )
-        ),
-        // Data rows
-        ...props.rows.map((row, i) =>
+            // Header row
             h('div', {
                 style: {
                     display: 'flex',
                     flexDirection: 'row',
                     width: '100%',
-                    borderBottom: i < props.rows.length - 1 ? '4px solid #374151' : 'none',
+                    padding: '0 8px',
+                    borderBottom: `1px solid ${Colors.coolSteel}33`,
                 }
             },
-                ...Object.keys(row).map((key, j) =>
+                ...props.headers.map((header, i) =>
                     h('div', {
                         style: {
                             display: 'flex',
-                            width: COL_WIDTHS[j] ?? `${100 / props.headers.length}%`,
-                            padding: '14px 24px',
-                            color: '#ffffff',
-                            fontSize: '28px',
-                            fontWeight: j === 0 ? 500 : 400,
+                            width: COL_WIDTHS[i],
+                            padding: '16px 20px',
+                            color: Colors.coolSteel,
+                            fontSize: '22px',
+                            fontWeight: 700,
+                            letterSpacing: '0.5px',
+                            textTransform: 'uppercase' as const,
                         }
-                    }, String(row[key]))
+                    }, header)
+                )
+            ),
+            // Data rows
+            ...props.rows.map((row, i) =>
+                h('div', {
+                    style: {
+                        display: 'flex',
+                        flexDirection: 'row',
+                        width: '100%',
+                        padding: '0 8px',
+                        borderBottom: i < props.rows.length - 1 ? `1px solid ${Colors.coolSteel}22` : 'none',
+                    }
+                },
+                    ...Object.keys(row).map((key, j) =>
+                        h('div', {
+                            style: {
+                                display: 'flex',
+                                width: COL_WIDTHS[j],
+                                padding: '20px',
+                                color: j === 0 ? Colors.white : Colors.coolSteel,
+                                fontSize: '28px',
+                                fontWeight: j === 0 ? 400 : 400,
+                                overflowWrap: 'break-word',
+                            }
+                        }, String(row[key]))
+                    )
                 )
             )
         )

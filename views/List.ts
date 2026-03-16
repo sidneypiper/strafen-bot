@@ -4,7 +4,8 @@ import {readFileSync} from "fs"
 import {join} from "path"
 import Table from "./Table"
 
-const interFont = readFileSync(join(import.meta.dir, "../assets/Inter-Regular.ttf"))
+const interRegular = readFileSync(join(import.meta.dir, "../assets/Inter-Regular.ttf"))
+const interBold = readFileSync(join(import.meta.dir, "../assets/Inter-Bold.ttf"))
 
 interface PenaltyRow {
     name: string
@@ -12,8 +13,14 @@ interface PenaltyRow {
     price: number
 }
 
-const WIDTH = 900
+// 2560:1799 ratio ≈ 10:7, scaled down
+const WIDTH = 1280
 const MAX_HEIGHT = 16000
+
+const FONTS = [
+    {name: 'Inter', data: new Uint8Array(interRegular).buffer, weight: 400 as const, style: 'normal' as const},
+    {name: 'Inter', data: new Uint8Array(interBold).buffer, weight: 700 as const, style: 'normal' as const},
+]
 
 export default async function genImageOfList(penalties: PenaltyRow[]): Promise<Buffer> {
     const headers = ['Name', 'Description', 'Price']
@@ -23,34 +30,14 @@ export default async function genImageOfList(penalties: PenaltyRow[]): Promise<B
 
     const element = Table({headers, rows})
 
-    // Render at generous height first
-    const svg = await satori(element as any, {
-        width: WIDTH,
-        height: MAX_HEIGHT,
-        fonts: [{
-            name: 'Inter',
-            data: new Uint8Array(interFont).buffer,
-            weight: 400,
-            style: 'normal',
-        }],
-    })
+    // Render at generous height first to measure real content height
+    const svg = await satori(element as any, {width: WIDTH, height: MAX_HEIGHT, fonts: FONTS})
 
-    // Use innerBBox to find the real content height, then crop
-    const resvg = new Resvg(svg)
-    const bbox = resvg.innerBBox()
+    const bbox = new Resvg(svg).innerBBox()
     const contentHeight = Math.ceil((bbox?.y ?? 0) + (bbox?.height ?? MAX_HEIGHT)) + 48
 
-    const croppedSvg = await satori(element as any, {
-        width: WIDTH,
-        height: contentHeight,
-        fonts: [{
-            name: 'Inter',
-            data: new Uint8Array(interFont).buffer,
-            weight: 400,
-            style: 'normal',
-        }],
-    })
+    const croppedSvg = await satori(element as any, {width: WIDTH, height: contentHeight, fonts: FONTS})
 
-    const pngData = new Resvg(croppedSvg).render()
+    const pngData = new Resvg(croppedSvg, {background: 'rgba(0,0,0,0)'}).render()
     return Buffer.from(pngData.asPng())
 }

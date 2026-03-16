@@ -19,7 +19,7 @@ export default new Command('help')
         }
 
         const embed = new EmbedBuilder()
-            .setColor(0x0099FF)
+            .setColor(0x7289DA)
             .setTitle('Available Commands')
             .setAuthor({ name: interaction.guild!.name + ' Strafenbot', iconURL: LOGO_URL })
             .setDescription('Use them wisely and responsibly!')

@@ -22,7 +22,7 @@ export default new Command('undo')
         const blamed = await guild.members.fetch(infraction.user_id);
 
         const confirmationEmbed = new EmbedBuilder()
-            .setColor(0x0099FF)
+            .setColor(0x7289DA)
             .setTitle(`Are you sure you want to undo you blaming ${blamed.displayName} for ${infraction.penalty_name}?`)
             .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
 
@@ -57,7 +57,7 @@ export default new Command('undo')
 
             if (confirmation.customId === 'cancel') {
                 const confirmationCancelEmbed = new EmbedBuilder()
-                    .setColor(0x0099FF)
+                    .setColor(0x7289DA)
                     .setTitle(`You decided not to undo the blame!`)
                     .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL});
 
@@ -72,7 +72,7 @@ export default new Command('undo')
                 db.infraction.delete(infraction.id)
 
                 const confirmationSuccessEmbed = new EmbedBuilder()
-                    .setColor(0x0099FF)
+                    .setColor(0x7289DA)
                     .setTitle(`You undid the blame! Really nice of you ${blamed.displayName}!`)
                     .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL});
 
@@ -86,7 +86,7 @@ export default new Command('undo')
             }
         } catch (e) {
             const notInTimeEmbed = new EmbedBuilder()
-                .setColor(0x0099FF)
+                .setColor(0x7289DA)
                 .setTitle(`You didn't confirm in time, the undo was canceled!`)
                 .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
 

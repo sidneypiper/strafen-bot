@@ -30,7 +30,7 @@ export default new Command('create')
         db.penalty.insert(name, description, price, guild.id);
 
         const embed = new EmbedBuilder()
-            .setColor(0x0099FF)
+            .setColor(0x7289DA)
             .setTitle(`${name} now costs ${price}! Watch out!`)
             .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
             .setDescription('Successfully added new penalty: ' + name)

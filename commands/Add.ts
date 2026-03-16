@@ -55,7 +55,7 @@ export default new Command('add')
         }
 
         const blamerMessage = new EmbedBuilder()
-            .setColor(0x0099FF)
+            .setColor(0x7289DA)
             .setTitle(`You successfully blamed ${blamed.displayName} for ${penalty.name}`)
             .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
 
@@ -70,7 +70,7 @@ export default new Command('add')
             .addComponents(dispute)
 
         const publicBlameEmbed = new EmbedBuilder()
-            .setColor(0x0099FF)
+            .setColor(0x7289DA)
             .setTitle(`Arghhh ${blamed.displayName}! ${blamee.displayName} blamed you for ${penalty.name}`)
             .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
             .setDescription('If you think this is wrong, click the button below to dispute the blame. You only have 1 hour to do so though!')
@@ -89,7 +89,7 @@ export default new Command('add')
             await publicBlame.awaitMessageComponent({filter: collectorFilterDispute, time: TIME_TO_DISPUTE})
 
             const disputeEmbedTie = new EmbedBuilder()
-                .setColor(0x0099FF)
+                .setColor(0x7289DA)
                 .setTitle(`You disputed the blame ${blamed.displayName}!`)
                 .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
                 .setDescription(`You now have the chance to tell others why you shouldn't be penalized for ${penalty.name}.\n\nOutsiders can now vote for ${Math.floor(TIME_TO_VOTE / 60_000.00)} minutes on whether you are guilty or not.\n\nAs soon as one outsider votes, the voting will end and the result will be displayed.`)
@@ -116,21 +116,21 @@ export default new Command('add')
                 switch (Math.sign(result.get(1)!.voteCount - result.get(2)!.voteCount)) {
                     case -1:
                         resultEmbed = new EmbedBuilder()
-                            .setColor(0x0099FF)
+                            .setColor(0x7289DA)
                             .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
                             .setTitle(`The crowd is cheering for you, ${blamed.displayName}! You are free to go.`)
                             .setDescription(`${blamee.displayName} failed to blame you for ${penalty.name}.`)
                         break
                     case 0:
                         resultEmbed = new EmbedBuilder()
-                            .setColor(0x0099FF)
+                            .setColor(0x7289DA)
                             .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
                             .setTitle(`In dubio pro reo, ${blamed.displayName}!`)
                             .setDescription(`${blamee.displayName} failed to blame you for ${penalty.name}.`)
                         break
                     case 1:
                         resultEmbed = new EmbedBuilder()
-                            .setColor(0x0099FF)
+                            .setColor(0x7289DA)
                             .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
                             .setTitle(`Unfortunately, you have been found guilty ${blamed.displayName}!`)
                             .setDescription(`${blamee.displayName} successfully blamed you for ${penalty.name} which costs you ${penalty.price}€.`)
@@ -149,7 +149,7 @@ export default new Command('add')
 
         } catch (e) {
             const notInTimeEmbed = new EmbedBuilder()
-                .setColor(0x0099FF)
+                .setColor(0x7289DA)
                 .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
                 .setTitle(`Too late ${blamed.displayName}!`)
                 .setDescription(`${blamee.displayName} blamed you for ${penalty.name} and you didn't dispute the blame in time. You are now officially blamed for ${penalty.name} which costs you ${penalty.price}€.`)
