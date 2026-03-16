@@ -20,7 +20,7 @@ initDiscordClient().then(client => {
     client.once(Events.ClientReady, async readyClient => {
         console.log(`Ready! Logged in as ${readyClient.user.tag}`);
 
-        readyClient.user.setActivity('your mistakes', {type: ActivityType.Watching});
+        readyClient.user.setActivity('Debt Collector', {type: ActivityType.Playing});
 
         const guildsWithChannel = db.guildSettings.allWithAnnouncementChannel();
         for (const settings of guildsWithChannel) {
