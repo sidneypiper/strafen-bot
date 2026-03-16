@@ -8,7 +8,7 @@ export default new Command('help')
             .setDescription('Show available commands.')
     })
     .setHandler(async interaction => {
-        const commands = {
+        const commands: Record<string, string> = {
             '/add': 'Add a penalty to a user.',
             '/cash': 'List current cash of server/user.',
             '/undo': 'Undo ur last added penalty.',
@@ -21,7 +21,7 @@ export default new Command('help')
         const embed = new EmbedBuilder()
             .setColor(0x0099FF)
             .setTitle('Available Commands')
-            .setAuthor({ name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL })
+            .setAuthor({ name: interaction.guild!.name + ' Strafenbot', iconURL: LOGO_URL })
             .setDescription('Use them wisely and responsibly!')
             .addFields([
                 { name: 'Command', value: Object.keys(commands).join('\n'), inline: true },

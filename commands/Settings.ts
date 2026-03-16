@@ -1,12 +1,11 @@
-import getDatabase from '../database/data-source';
+import db from '../database/data-source';
 import Command from '../core/Command';
-import {GuildSettings} from "../database/entity/GuildSettings";
 
 const AVAILABLE_SETTINGS = [
     {name: 'Currency', value: 'currency'}
 ]
 
-const DEFAULT_SETTINGS = {
+const DEFAULT_SETTINGS: Record<string, string> = {
     currency: '$'
 }
 
@@ -37,33 +36,17 @@ export default new Command('settings')
     .setHandler(async interaction => {
         await interaction.deferReply()
 
-        const database = await getDatabase();
-
+        const guild = interaction.guild!;
         const setting = interaction.options.getString('setting', true)
 
         switch (interaction.options.getSubcommand()) {
             case 'reset':
-                await database
-                    .getRepository(GuildSettings)
-                    .createQueryBuilder()
-                    .update()
-                    .set({[setting]: DEFAULT_SETTINGS[setting]})
-                    .where('id = :id', {id: interaction.guild.id})
-                    .execute()
-
+                db.guildSettings.updateSetting(guild.id, setting, DEFAULT_SETTINGS[setting])
                 await interaction.editReply(`Reset ${setting} to default value.`)
                 break;
             case 'set':
                 const value = interaction.options.getString('value', true)
-
-                await database
-                    .getRepository(GuildSettings)
-                    .createQueryBuilder()
-                    .update()
-                    .set({[setting]: value})
-                    .where('id = :id', {id: interaction.guild.id})
-                    .execute()
-
+                db.guildSettings.updateSetting(guild.id, setting, value)
                 await interaction.editReply(`Set ${setting} to ${value}.`)
                 break;
         }

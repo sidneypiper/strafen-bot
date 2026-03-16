@@ -1,10 +1,8 @@
 import {EmbedBuilder} from 'discord.js';
 import Command from '../core/Command';
 import {LOGO_URL} from '../core/Helpers';
-import getDatabase from '../database/data-source';
-import {Penalty} from '../database/entity/Penalty';
+import db from '../database/data-source';
 import {filter} from 'fuzzaldrin-plus';
-import {Equal, ILike} from 'typeorm';
 
 export default new Command('remove')
     .setBuilder(builder => {
@@ -17,17 +15,10 @@ export default new Command('remove')
                     .setAutocomplete(true))
     })
     .setAutocomplete(async interaction => {
-        const database = await getDatabase();
-
-        const penalties = await database.manager.find(Penalty, {
-            select: ['name'],
-            where: {
-                guild_id: interaction.guild.id
-            }
-        });
+        const penalties = db.penalty.findNamesByGuild(interaction.guild!.id)
 
         const input = interaction.options.getFocused();
-        const possible = penalties.map(penalty => penalty.name);
+        const possible = penalties.map(p => p.name);
 
         if (input === null || input.length === 0) return possible;
 
@@ -36,33 +27,34 @@ export default new Command('remove')
     .setHandler(async interaction => {
         await interaction.deferReply();
 
-        const database = await getDatabase();
+        const guild = interaction.guild!;
+        const name = interaction.options.getString('name', true);
 
-        const name = interaction.options.getString('name');
+        const penalty = db.penalty.findByGuildAndName(guild.id, name.trim())
+        if (!penalty) {
+            await interaction.editReply({
+                content: `:warning: The penalty with the name ${name} does not exist.`,
+            });
+            return
+        }
 
-        database.getRepository(Penalty).findOneByOrFail({
-            guild_id: Equal(interaction.guild.id),
-            name: ILike(name.trim()),
-        }).then(async (p) => {
-            await database.manager.remove(p);
+        try {
+            db.penalty.delete(penalty.id);
 
             const embed = new EmbedBuilder()
                 .setColor(0x0099FF)
                 .setTitle('Removed penalty')
-                .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
+                .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
                 .setDescription('Successfully removed penalty: ' + name)
 
             await interaction.editReply({embeds: [embed]});
-        }).catch((err) => {
-            if (err.code === "SQLITE_CONSTRAINT") {
-                interaction.editReply({
+        } catch (err: any) {
+            if (err.message?.includes("FOREIGN KEY")) {
+                await interaction.editReply({
                     content: `:warning: The penalty with the name ${name} is still in use and cannot be deleted.`,
                 });
                 return;
             }
-
-            interaction.editReply({
-                content: `:warning: The penalty with the name ${name} does not exist.`,
-            });
-        });
+            throw err;
+        }
     });

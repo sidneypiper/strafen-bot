@@ -1,8 +1,7 @@
 import {EmbedBuilder} from 'discord.js';
 import Command from '../core/Command';
 import {LOGO_URL} from '../core/Helpers';
-import getDatabase from '../database/data-source';
-import {Penalty} from '../database/entity/Penalty';
+import db from '../database/data-source';
 
 export default new Command('create')
     .setBuilder(builder =>
@@ -23,28 +22,17 @@ export default new Command('create')
     .setHandler(async interaction => {
         await interaction.deferReply();
 
-        const database = await getDatabase();
+        const guild = interaction.guild!;
+        const name = interaction.options.getString('name', true)
+        const description = interaction.options.getString('description', true)
+        const price = interaction.options.getNumber('price', true)
 
-        // @ts-ignore
-        const name = interaction.options.getString('name')
-
-        // @ts-ignore
-        const description = interaction.options.getString('description')
-
-        // @ts-ignore
-        const price = interaction.options.getNumber('price')
-
-        await database.manager.insert(Penalty, {
-            name: name,
-            description: description,
-            price: price,
-            guild_id: interaction.guild.id
-        });
+        db.penalty.insert(name, description, price, guild.id);
 
         const embed = new EmbedBuilder()
             .setColor(0x0099FF)
             .setTitle(`${name} now costs ${price}! Watch out!`)
-            .setAuthor({name: interaction.guild.name + ' Strafenbot', iconURL: LOGO_URL})
+            .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
             .setDescription('Successfully added new penalty: ' + name)
 
         await interaction.editReply({embeds: [embed]});

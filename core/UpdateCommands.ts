@@ -1,7 +1,7 @@
 import {Events, Routes} from "discord.js";
 import {initDiscordClient, COMMANDS} from "./Helpers";
 
-const clientId = process.env.DC_CLIENT_ID;
+const clientId = process.env.DC_CLIENT_ID!;
 
 initDiscordClient().then(client => {
     client.on(Events.ClientReady, async readyClient => {

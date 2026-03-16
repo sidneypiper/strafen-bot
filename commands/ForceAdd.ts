@@ -1,17 +1,7 @@
+import {GuildMember} from 'discord.js'
 import Command from '../core/Command'
-import getDatabase from '../database/data-source'
-import {Penalty} from '../database/entity/Penalty'
+import db from '../database/data-source'
 import {filter} from 'fuzzaldrin-plus'
-import {DataSource, Equal, ILike} from 'typeorm'
-import {Infraction} from '../database/entity/Infraction'
-
-async function persistPenalty(database: DataSource, guildId: string, userId: string, penalty: Penalty) {
-    await database.getRepository(Infraction).insert({
-        guild_id: guildId,
-        user_id: userId,
-        penalty: penalty
-    })
-}
 
 export default new Command('force-add')
     .setBuilder(builder => {
@@ -28,17 +18,10 @@ export default new Command('force-add')
                     .setAutocomplete(true))
     })
     .setAutocomplete(async interaction => {
-        const database = await getDatabase()
-
-        const penalties = await database.manager.find(Penalty, {
-            select: ['name'],
-            where: {
-                guild_id: interaction.guild.id
-            }
-        })
+        const penalties = db.penalty.findNamesByGuild(interaction.guild!.id)
 
         const input = interaction.options.getFocused()
-        const possible = penalties.map(penalty => penalty.name)
+        const possible = penalties.map(p => p.name)
 
         if (input === null || input.length === 0) return possible
 
@@ -47,24 +30,22 @@ export default new Command('force-add')
     .setHandler(async interaction => {
         await interaction.deferReply({ephemeral: true})
 
-        const database = await getDatabase()
+        const guild = interaction.guild!
+        const blamed = interaction.options.getMember('user') as GuildMember | null
+        if (!blamed) throw new Error('Member not found.')
 
-        const blamed = interaction.options.getMember('user')
-        if (!('id' in blamed)) throw new Error('Member not found.')
+        const penaltyName = interaction.options.getString('penalty', true)
 
-        const penalty = interaction.options.getString('penalty')
-
-        database.getRepository(Penalty).findOneByOrFail({
-            guild_id: Equal(interaction.guild.id),
-            name: ILike(penalty.trim()),
-        }).then(async (penalty) => {
-            await persistPenalty(database, interaction.guild.id, blamed.id!, penalty);
+        const penalty = db.penalty.findByGuildAndName(guild.id, penaltyName.trim())
+        if (!penalty) {
             await interaction.editReply({
-                content: `Successfully added the penalty ${penalty.name} to ${blamed.displayName!}.`,
+                content: `:warning: The penalty with the name ${penaltyName} does not exist.`,
             })
-        }).catch(async () => {
-            await interaction.editReply({
-                content: `:warning: The penalty with the name ${penalty} does not exist.`,
-            })
+            return
+        }
+
+        db.infraction.insert(blamed.id, guild.id, penalty.id)
+        await interaction.editReply({
+            content: `Successfully added the penalty ${penalty.name} to ${blamed.displayName}.`,
         })
     })

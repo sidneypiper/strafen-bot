@@ -13,7 +13,7 @@ import {
  **/
 export default class Command {
     name: string
-    command: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder
+    command!: SlashCommandBuilder | SlashCommandOptionsOnlyBuilder | SlashCommandSubcommandsOnlyBuilder
 
     constructor(name: string) {
         this.name = name;
@@ -66,13 +66,13 @@ export default class Command {
                     content: ':warning: There was an error while executing this command!',
                     ephemeral: true
                 });
-            } catch (error) {
-                if (error.code === "InteractionAlreadyReplied") {
+            } catch (replyError: any) {
+                if (replyError.code === "InteractionAlreadyReplied") {
                     await interaction.editReply({
                         content: ':warning: There was an error while executing this command!',
                     });
                 } else {
-                    console.error('Error while replying to interaction', error)
+                    console.error('Error while replying to interaction', replyError)
                 }
             }
         }
