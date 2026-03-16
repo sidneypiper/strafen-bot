@@ -1,14 +1,6 @@
-import {Column, CreateDateColumn, Entity, PrimaryColumn} from "typeorm"
-
-@Entity()
-export class GuildSettings {
-
-    @PrimaryColumn()
+export interface GuildSettings {
     id: string
-
-    @Column()
     currency: string
-
-    @CreateDateColumn()
-    created_on: Date
+    announcement_channel: string | null
+    created_on: string
 }
