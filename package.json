@@ -4,30 +4,20 @@
   "type": "module",
   "devDependencies": {
     "@types/bun": "latest",
-    "@types/node": "^16.18.126",
-    "@vue/babel-plugin-jsx": "^1.4.0",
-    "ts-node": "10.9.1",
-    "typescript": "5.4.5"
+    "@types/node": "^22.0.0",
+    "typescript": "^5.8.0"
   },
   "peerDependencies": {
     "typescript": "^5.0.0"
   },
   "dependencies": {
-    "@types/fuzzaldrin-plus": "^0.6.5",
+    "@resvg/resvg-js": "^2.6.2",
     "discord.js": "^14.19.3",
     "fuzzaldrin-plus": "^0.6.0",
-    "htm": "^3.1.1",
-    "preact": "^10.26.7",
-    "preact-render-to-string": "^6.5.13",
-    "puppeteer": "^22.15.0",
-    "reflect-metadata": "^0.1.14",
-    "sqlite3": "^5.1.7",
-    "typeorm": "0.3.20",
-    "vue": "^3.5.15"
+    "satori": "^0.12.1"
   },
   "scripts": {
     "update": "bun run core/UpdateCommands.ts",
-    "start": "bun run index.ts",
-    "typeorm": "typeorm-ts-node-commonjs"
+    "start": "bun run index.ts"
   }
 }
