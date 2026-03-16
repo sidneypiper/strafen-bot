@@ -1,3 +1,4 @@
+import './core/Logger';
 import {COMMANDS, initDiscordClient} from './core/Helpers';
 import {ActivityType, Events, MessageFlags, TextChannel} from "discord.js";
 import db from "./database/data-source";

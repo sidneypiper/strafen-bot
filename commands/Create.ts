@@ -1,6 +1,4 @@
-import {EmbedBuilder} from 'discord.js';
 import Command from '../core/Command';
-import {LOGO_URL} from '../core/Helpers';
 import db from '../database/data-source';
 
 export default new Command('create')
@@ -29,11 +27,5 @@ export default new Command('create')
 
         db.penalty.insert(name, description, price, guild.id);
 
-        const embed = new EmbedBuilder()
-            .setColor(0x7289DA)
-            .setTitle(`${name} now costs ${price}! Watch out!`)
-            .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
-            .setDescription('Successfully added new penalty: ' + name)
-
-        await interaction.editReply({embeds: [embed]});
+        await interaction.editReply(`**${name}** has been added. It'll cost **${price}€**. Consider yourself warned.`);
     });

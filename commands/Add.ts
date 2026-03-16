@@ -1,12 +1,11 @@
-import {ActionRowBuilder, ButtonBuilder, ButtonStyle, EmbedBuilder, GuildMember, MessageFlags, PollLayoutType} from 'discord.js'
+import {ActionRowBuilder, ButtonBuilder, ButtonStyle, GuildMember, MessageFlags, PollLayoutType} from 'discord.js'
 import Command from '../core/Command'
-import {LOGO_URL} from '../core/Helpers'
 import db from '../database/data-source'
 import type {Penalty} from '../database/entity/Penalty'
 import {filter} from 'fuzzaldrin-plus'
 
-const TIME_TO_DISPUTE = 1_000 * 60 * 60
-const TIME_TO_VOTE = 1_000 * 60 * 60
+const TIME_TO_DISPUTE = 1_000 * 60
+const TIME_TO_VOTE    = 1_000 * 60
 
 function persistPenalty(guildId: string, userId: string, penalty: Penalty) {
     db.infraction.insert(userId, guildId, penalty.id)
@@ -18,22 +17,19 @@ export default new Command('add')
             .setDescription('Blame a user for a penalty.')
             .addUserOption(option =>
                 option.setName('user')
-                    .setDescription('The name of the user to blame.')
+                    .setDescription('The user to blame.')
                     .setRequired(true))
             .addStringOption(option =>
                 option.setName('penalty')
-                    .setDescription('The name of the penalty.')
+                    .setDescription('The penalty to assign.')
                     .setRequired(true)
                     .setAutocomplete(true))
     })
     .setAutocomplete(async interaction => {
         const penalties = db.penalty.findNamesByGuild(interaction.guild!.id)
-
         const input = interaction.options.getFocused()
         const possible = penalties.map(p => p.name)
-
-        if (input === null || input.length === 0) return possible
-
+        if (!input || input.length === 0) return possible
         return filter(possible, input)
     })
     .setHandler(async interaction => {
@@ -44,123 +40,76 @@ export default new Command('add')
         const blamed = interaction.options.getMember('user') as GuildMember | null
         if (!blamed) throw new Error('Member not found.')
 
-        const penaltyName = interaction.options.getString('penalty')!
-
-        const penalty = db.penalty.findByGuildAndName(guild.id, penaltyName.trim())
-        if (!penalty) {
-            await interaction.editReply({
-                content: `:warning: The penalty with the name ${penaltyName} does not exist.`,
-            })
+        if (blamed.id === blamee.id) {
+            await interaction.editReply(`:warning: You can't blame yourself.`)
             return
         }
 
-        const blamerMessage = new EmbedBuilder()
-            .setColor(0x7289DA)
-            .setTitle(`You successfully blamed ${blamed.displayName} for ${penalty.name}`)
-            .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
-
-        await interaction.editReply({embeds: [blamerMessage]})
-
-        const dispute = new ButtonBuilder()
-            .setCustomId('dispute')
-            .setLabel('I didn\'t do that!!')
-            .setStyle(ButtonStyle.Danger)
-
-        const row = new ActionRowBuilder<ButtonBuilder>()
-            .addComponents(dispute)
-
-        const publicBlameEmbed = new EmbedBuilder()
-            .setColor(0x7289DA)
-            .setTitle(`Arghhh ${blamed.displayName}! ${blamee.displayName} blamed you for ${penalty.name}`)
-            .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
-            .setDescription('If you think this is wrong, click the button below to dispute the blame. You only have 1 hour to do so though!')
-
-        const publicBlame = await interaction.followUp({
-            content: blamed.toString(),
-            embeds: [publicBlameEmbed],
-            components: [row]
-        })
-
-        const collectorFilterDispute = (i: { user: { id: string }; customId: string }) => {
-            return i.user.id === blamed.id && i.customId === 'dispute'
+        const penaltyName = interaction.options.getString('penalty', true)
+        const penalty = db.penalty.findByGuildAndName(guild.id, penaltyName.trim())
+        if (!penalty) {
+            await interaction.editReply(`:warning: No penalty named **${penaltyName}** found.`)
+            return
         }
 
+        await interaction.editReply(`✅ You blamed **${blamed.displayName}** for **${penalty.name}**.`)
+
+        const publicBlame = await interaction.followUp({
+            content: `${blamed.toString()} — you've been blamed for **${penalty.name}** (${penalty.price}€) by **${blamee.displayName}**.\nDispute within 1 minute if you think this is wrong.`,
+            components: [new ActionRowBuilder<ButtonBuilder>().addComponents(
+                new ButtonBuilder().setCustomId('dispute').setLabel(`I didn't do that!`).setStyle(ButtonStyle.Danger)
+            )]
+        })
+
         try {
-            await publicBlame.awaitMessageComponent({filter: collectorFilterDispute, time: TIME_TO_DISPUTE})
+            const disputeInteraction = await publicBlame.awaitMessageComponent({
+                filter: i => i.user.id === blamed.id && i.customId === 'dispute',
+                time: TIME_TO_DISPUTE
+            })
 
-            const disputeEmbedTie = new EmbedBuilder()
-                .setColor(0x7289DA)
-                .setTitle(`You disputed the blame ${blamed.displayName}!`)
-                .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
-                .setDescription(`You now have the chance to tell others why you shouldn't be penalized for ${penalty.name}.\n\nOutsiders can now vote for ${Math.floor(TIME_TO_VOTE / 60_000.00)} minutes on whether you are guilty or not.\n\nAs soon as one outsider votes, the voting will end and the result will be displayed.`)
+            await disputeInteraction.reply({
+                content: `You've disputed the blame. A vote is now running for 1 minute.`,
+                flags: MessageFlags.Ephemeral
+            })
 
-            const poll = {
-                question: {text: `Is ${blamed.displayName} guilty of ${penalty.name}? (1h)`},
-                answers: [
-                    {text: 'Yes', emoji: '👮'},
-                    {text: 'No', emoji: '⚖️'}
-                ],
+            const voteMessage = await interaction.followUp({poll: {
+                question: {text: `Did ${blamed.displayName} commit: ${penalty.name}?`},
+                answers: [{text: 'Guilty 👮', emoji: '👮'}, {text: 'Innocent ⚖️', emoji: '⚖️'}],
                 allowMultiselect: false,
                 duration: 1,
                 layoutType: PollLayoutType.Default
-            }
-
-            const voteMessage = await interaction.followUp({poll})
-
-            setTimeout(async () => {
-                const vote = await voteMessage.poll!.end()
-                const result = vote.poll!.answers
-
-                let resultEmbed: EmbedBuilder | undefined
-
-                switch (Math.sign(result.get(1)!.voteCount - result.get(2)!.voteCount)) {
-                    case -1:
-                        resultEmbed = new EmbedBuilder()
-                            .setColor(0x7289DA)
-                            .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
-                            .setTitle(`The crowd is cheering for you, ${blamed.displayName}! You are free to go.`)
-                            .setDescription(`${blamee.displayName} failed to blame you for ${penalty.name}.`)
-                        break
-                    case 0:
-                        resultEmbed = new EmbedBuilder()
-                            .setColor(0x7289DA)
-                            .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
-                            .setTitle(`In dubio pro reo, ${blamed.displayName}!`)
-                            .setDescription(`${blamee.displayName} failed to blame you for ${penalty.name}.`)
-                        break
-                    case 1:
-                        resultEmbed = new EmbedBuilder()
-                            .setColor(0x7289DA)
-                            .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
-                            .setTitle(`Unfortunately, you have been found guilty ${blamed.displayName}!`)
-                            .setDescription(`${blamee.displayName} successfully blamed you for ${penalty.name} which costs you ${penalty.price}€.`)
-                        persistPenalty(guild.id, blamed.id, penalty)
-                        break
-                }
-
-                await publicBlame.edit({
-                    content: null,
-                    embeds: [resultEmbed!],
-                    components: []
-                })
-
-                await vote.delete();
-            }, TIME_TO_VOTE)
-
-        } catch (e) {
-            const notInTimeEmbed = new EmbedBuilder()
-                .setColor(0x7289DA)
-                .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
-                .setTitle(`Too late ${blamed.displayName}!`)
-                .setDescription(`${blamee.displayName} blamed you for ${penalty.name} and you didn't dispute the blame in time. You are now officially blamed for ${penalty.name} which costs you ${penalty.price}€.`)
+            }})
 
             await publicBlame.edit({
-                content: null,
-                embeds: [notInTimeEmbed],
+                content: `🗳️ **${blamed.displayName}** disputed the blame! A vote is running for 1 minute.`,
                 components: []
             })
 
+            setTimeout(async () => {
+                const vote = await voteMessage.poll!.end()
+                const answers = vote.poll!.answers
+                const guiltyVotes = answers.get(1)!.voteCount
+                const innocentVotes = answers.get(2)!.voteCount
+
+                let result: string
+                if (guiltyVotes > innocentVotes) {
+                    result = `⚖️ Guilty! The crowd voted **${guiltyVotes}–${innocentVotes}**. **${penalty.name}** (${penalty.price}€) stands.`
+                    persistPenalty(guild.id, blamed.id, penalty)
+                } else if (innocentVotes > guiltyVotes) {
+                    result = `🎉 Innocent! The crowd voted **${innocentVotes}–${guiltyVotes}** in favour of **${blamed.displayName}**. No fine applied.`
+                } else {
+                    result = `🤝 Tie vote — in dubio pro reo. **${blamed.displayName}** gets the benefit of the doubt.`
+                }
+
+                await publicBlame.edit({content: result, components: []})
+                await vote.delete()
+            }, TIME_TO_VOTE)
+
+        } catch {
+            await publicBlame.edit({
+                content: `⏰ Time's up, **${blamed.displayName}**. No dispute within 1 minute. **${penalty.name}** (${penalty.price}€) is confirmed.`,
+                components: []
+            })
             persistPenalty(guild.id, blamed.id, penalty)
-            return
         }
     })

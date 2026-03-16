@@ -1,3 +1,4 @@
+import './Logger';
 import {Events, Routes} from "discord.js";
 import {initDiscordClient, COMMANDS} from "./Helpers";
 

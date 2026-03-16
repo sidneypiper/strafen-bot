@@ -11,7 +11,6 @@ import ForceAdd from "../commands/ForceAdd";
 import Settings from "../commands/Settings";
 import UseThisChannel from "../commands/UseThisChannel";
 
-export const LOGO_URL = 'https://i.imgur.com/77nbiOw.jpeg';
 export const COMMANDS: Command[] = [Cash, List, Create, Remove, Add, Undo, Help, ForceAdd, Settings, UseThisChannel];
 
 export async function initDiscordClient(): Promise<Client> {

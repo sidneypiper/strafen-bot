@@ -3,34 +3,33 @@ import {Colors} from '../core/Colors'
 interface TableData {
     headers: string[]
     rows: { [key: string]: any }[]
+    colWidths?: string[]
+    colColors?: (string | undefined)[]
+    boldLastCol?: boolean
 }
 
 function h(type: string, props: Record<string, any> | null, ...children: any[]): any {
     return {type, props: {...props, children: children.length === 1 ? children[0] : children}}
 }
 
-// Name 28%, Description 54%, Price 18%
-const COL_WIDTHS = ['28%', '54%', '18%']
+// Default: Name 28%, Description 54%, Price 18%
+const DEFAULT_COL_WIDTHS = ['28%', '54%', '18%']
 
 export default function Table(props: TableData): any {
+    const COL_WIDTHS = props.colWidths ?? DEFAULT_COL_WIDTHS
+    const COL_COLORS = props.colColors ?? []
     return h('div', {
         style: {
             display: 'flex',
             flexDirection: 'column',
             width: '100%',
-            padding: '12px',
         }
     },
-        // Outer card
         h('div', {
             style: {
                 display: 'flex',
                 flexDirection: 'column',
                 width: '100%',
-                backgroundColor: Colors.chatBackground,
-                borderRadius: '12px',
-                border: `1px solid ${Colors.coolSteel}22`,
-                overflow: 'hidden',
             }
         },
             // Header row
@@ -75,9 +74,9 @@ export default function Table(props: TableData): any {
                                 display: 'flex',
                                 width: COL_WIDTHS[j],
                                 padding: '20px',
-                                color: j === 0 ? Colors.white : Colors.coolSteel,
+                                color: COL_COLORS[j] ?? (j === 0 ? Colors.white : Colors.coolSteel),
                                 fontSize: '28px',
-                                fontWeight: j === 0 ? 400 : 400,
+                                fontWeight: (props.boldLastCol && j === Object.keys(row).length - 1) ? 700 : (j === 0 ? 400 : 400),
                                 overflowWrap: 'break-word',
                             }
                         }, String(row[key]))

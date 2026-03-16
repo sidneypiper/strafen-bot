@@ -1,6 +1,4 @@
-import {EmbedBuilder} from 'discord.js';
 import Command from '../core/Command';
-import {LOGO_URL} from '../core/Helpers';
 import db from '../database/data-source';
 import {filter} from 'fuzzaldrin-plus';
 
@@ -16,12 +14,9 @@ export default new Command('remove')
     })
     .setAutocomplete(async interaction => {
         const penalties = db.penalty.findNamesByGuild(interaction.guild!.id)
-
         const input = interaction.options.getFocused();
         const possible = penalties.map(p => p.name);
-
         if (input === null || input.length === 0) return possible;
-
         return filter(possible, input);
     })
     .setHandler(async interaction => {
@@ -32,27 +27,16 @@ export default new Command('remove')
 
         const penalty = db.penalty.findByGuildAndName(guild.id, name.trim())
         if (!penalty) {
-            await interaction.editReply({
-                content: `:warning: The penalty with the name ${name} does not exist.`,
-            });
+            await interaction.editReply(`:warning: No penalty named **${name}** found.`);
             return
         }
 
         try {
             db.penalty.delete(penalty.id);
-
-            const embed = new EmbedBuilder()
-                .setColor(0x7289DA)
-                .setTitle('Removed penalty')
-                .setAuthor({name: guild.name + ' Strafenbot', iconURL: LOGO_URL})
-                .setDescription('Successfully removed penalty: ' + name)
-
-            await interaction.editReply({embeds: [embed]});
+            await interaction.editReply(`**${name}** has been removed.`);
         } catch (err: any) {
             if (err.message?.includes("FOREIGN KEY")) {
-                await interaction.editReply({
-                    content: `:warning: The penalty with the name ${name} is still in use and cannot be deleted.`,
-                });
+                await interaction.editReply(`:warning: **${name}** is still in use and cannot be deleted.`);
                 return;
             }
             throw err;
