@@ -4,4 +4,5 @@ export const Colors = {
     coolSteel: '#99aab5',
     jetBlack: '#2c2f33',
     shadowGrey: '#23272a',
+    chatBackground: '#232327',
 } as const

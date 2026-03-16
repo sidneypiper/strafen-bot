@@ -27,7 +27,7 @@ export default function Table(props: TableData): any {
                 display: 'flex',
                 flexDirection: 'column',
                 width: '100%',
-                backgroundColor: Colors.jetBlack,
+                backgroundColor: Colors.chatBackground,
                 borderRadius: '12px',
                 border: `1px solid ${Colors.coolSteel}22`,
                 overflow: 'hidden',
